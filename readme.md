@@ -1,4 +1,4 @@
-rmmd1.1
+rmmd1.2
 
 Simple low argument bash front end for youtube-dl.
 
