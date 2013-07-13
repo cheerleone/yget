@@ -1,0 +1,29 @@
+  
+  Youtube Get
+  
+  Options:
+    Argument one      : Quality Settings
+      add
+        h             : high quality   (1080p)
+        m             : medium quality (720p)
+        l             : low quality    (480p)
+  
+    Argument two
+      URL             : URL of Video
+  
+    Argument one      : Options
+      s               : Start download
+      L               : List titles in queue
+      Ll              : List titles in queue + loop until done
+      d               : Delete first title in queue
+      D               : Delete database / queue
+      p               : Push first record to last - if 2+
+      v               : Version
+  
+    Examples
+      yg h https://youtube.com/somevideo
+         -- add high quality 1080p videoto queue
+      yg L
+         -- list queued videos in database
+      yg s
+         -- start download"
