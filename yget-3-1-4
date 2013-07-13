@@ -22,15 +22,17 @@ BLOCK_COMMENT
 
   # version
 
-VERSION="2013.jun.02.3.1.4.beta";                 # yyyy.mm.major.minor.point.stage
+VERSION="2013.jun.02.3.1.4.beta";              # yyyy.mm.major.minor.point.stage
 
   # user settings
 
-DOWN_STREAM_RATE="1600K";                       # ~75% of connection speed is good
-OUTPUT_PATH="/home/rwm/Videos";                # where to put downloaded videos
+DOWN_STREAM_RATE="1600K";                      # ~75% of connection speed is good
+OUTPUT_PATH="~/Videos";                        # where to put downloaded videos
 NOTIFY_ICON="/usr/share/icons/Faenza/apps/scalable/youtube.svg"; # url to icon used in GUI notifications
+
+  # dev options
+
 DEBUG="N";                                     # output debug information if "Y"
-#VERBOSE="Y";                                   # output more info Y/N
 
   # global variables
 
@@ -47,7 +49,7 @@ ACTUAL_FORMAT=;                                # cosmetic user notification of t
 FORMAT_STRING=;                                # cosmetic user output
 DL_ERRORS=0;                                   # counter for determining how many times youtube-dl exited abnormally
 MAX_DL_ERRORS=8;                               # .. abnormal exit cap
-ERROR_TIME=24;				       # number of seconds to wait after an error.
+ERROR_TIME=24;				                         # number of seconds to wait after an error.
 
 #-------------------------------------------------------------------------------
 
