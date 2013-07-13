@@ -19,7 +19,7 @@ I strongly recommend an alias to your ~/.bashrc file such as:
 
 alias yg='$HOME/devel/yget/yget'
 
-Close and re-open your terminal after adding the lin above, then run yget simply by typing yg
+Close and re-open your terminal after adding the line above, then run yget simply by typing yg
 
 For help type:
 
