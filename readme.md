@@ -7,8 +7,11 @@ at least once it’s configured for your environment.
 Important setup notes: Edit script to configure user environment settings:
 
 DOWN_STREAM_RATE - use to cap the bandwidth youtube dl will use
+
 OUTPUT_PATH - where your videos will be saved
+
 NOTIFY_ICON - the icon to use for desktop notifications.
+
 DATABASE - file where yget stores temporary data eg /tmp/somefile
 
 Bash and aliases
