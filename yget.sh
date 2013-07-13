@@ -22,7 +22,7 @@ BLOCK_COMMENT
 
   # version
 
-VERSION="2013.jun.02.3.1.4.beta";              # yyyy.mm.major.minor.point.stage
+VERSION="3.1.4.beta";                          # major.minor.point.stage
 
   # user settings
 
@@ -387,6 +387,8 @@ Extending the script with further formats should be trivial. IMO the 3 quality s
   Known Bugs
 
 Avoiding bash funk. Add "Quotes" to the URls. If quotes are not used, Youtube URLs containing an & will cause youtube-dl to become a background task causing the shell prompt not to appear until enter is pressed after script completion. This is due to the way youtube-dl outputs during use even as a background task and some bash weirdness I haven't had time to research.
+
+Youtube changed the way they report some videos. Until one funtion is fixed, the words "unknown format" will appear next to the actual known format.
 
   Known Limitations
 

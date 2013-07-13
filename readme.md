@@ -17,9 +17,9 @@ DATABASE - file where yget stores temporary data eg /tmp/somefile
 Bash and aliases
 I strongly recommend an alias to your ~/.bashrc file such as:
 
-alias yg='$HOME/devel/yget/yget-3-1-4'
+alias yg='$HOME/devel/yget/yget'
 
-Be sure to set the alias to the current version, close and re-open your terminal then run yget simply by typing yg
+Close and re-open your terminal after adding the lin above, then run yget simply by typing yg
 
 For help type:
 
@@ -30,5 +30,5 @@ Lastly, if your youtube links contain the “&” character, be sure to encapsul
     yg m “https://www.youtube.com/v/_-GYgAxsbPs?version=3&f=user_uploads&app=youtube_gdata”
 
 -------
-doc.1.0.0.2
+doc.1.3
 
