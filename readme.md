@@ -1,19 +1,30 @@
-rmmd1.2
+Youtube Get
 
-Simple low argument bash front end for youtube-dl.
+A simple low argument bash front end for youtube-dl...
 
-Requires 2 arguments:
+at least once it’s configured for your environment.
 
-first argument: l - Low Quality - 360p/480p m - Medium Quality - 720p h - High Quality - 1080p f - Format list
+Important setup notes: Edit script to configure user environment settings:
 
-second argument youtube or supported youtube-dl URL
+DOWN_STREAM_RATE - use to cap the bandwidth youtube dl will use
+OUTPUT_PATH - where your videos will be saved
+NOTIFY_ICON - the icon to use for desktop notifications.
+DATABASE - file where yget stores temporary data eg /tmp/somefile
 
-Important, set the rate option inside the script to less than your connection speed.
+Bash and aliases
+I strongly recommend an alias to your ~/.bashrc file such as:
 
-Notes. Made for those who use youtube-dl many times per hour, but are too lazy to type a host of tacs.
+alias yg='$HOME/devel/yget/yget-3-1-4'
 
-The script first tries a webm video, if that fails it tries mp4.
+Be sure to set the alias to the current version, close and re-open your terminal then run yget simply by typing yg
 
-I'm sure there are more elegant ways of simplifying this script or improving function. It's imperative that only one parameter be passed to initiate a download.
+For help type:
 
-~CL
+ yg -h | more
+
+Lastly, if your youtube links contain the “&” character, be sure to encapsulate the url in quotes, otherwise the & will fork back to the command line, but continue to output script messages.
+
+    yg m “https://www.youtube.com/v/_-GYgAxsbPs?version=3&f=user_uploads&app=youtube_gdata”
+
+
+
