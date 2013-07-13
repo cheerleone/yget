@@ -1,8 +1,8 @@
 Youtube Get
 
-A simple low argument bash front end for youtube-dl...
+A simple low argument bash front end for youtube-dl...at least once it’s configured for your environment.
 
-at least once it’s configured for your environment.
+The basic idea is that we pre-configure the (my!) most used options to simplify use. That and yg will stack and sequentially download videos added making it a huge time-saver.
 
 Important setup notes: Edit script to configure user environment settings:
 
