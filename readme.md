@@ -15,7 +15,7 @@ NOTIFY_ICON - the icon to use for desktop notifications.
 DATABASE - file where yget stores temporary data eg /tmp/somefile
 
 Bash and aliases
-I strongly recommend an alias to your ~/.bashrc file such as:
+I strongly recommend adding an alias to your ~/.bashrc file such as:
 
 alias yg='$HOME/devel/yget/yget'
 
