@@ -1,0 +1,23 @@
+  Youtube-Get
+
+Redesigned to store URLs as each is added. The first called instance adds the URL to its queue, initiates the download process, then remains active until all videos have completed. Subsequent calls append the URL to the queue. The queue format is a temporary FIFO flat file database.
+
+Bandwidth harmony and overall simplicity: The motivation for this revision came through identifying issues during daily use. 
+
+IMO experience: When reading aggregated content with many new URLs I could open a terminal and start another process per video, however this would disregard bandwidth restrictions defined in the script. To avoid reaching available bandwidth capacity with parallel downloads, each video will download sequentially at a rate determined by the rate-cap defined in the script, (dependent on network conditions). This consideration reserves bandwidth to perform other tasks without over-saturating network capacity.
+
+While it's possible to build a list of URL's and pass the list to youtube-dl, I believe that combining operating simplicity (short commands) with the ability to arbitrarily add more URLs during use to be significantly less work to manage overall. Effectively this results in less time wasted with waiting for downloads to finish, providing more time to watch the videos.
+
+The idea to move the entire script to Python arose. A functional program could be created in Python however; I was forgetting one important element; I use this script both at a PC and via ssh equally. Moving to Python, I would have wanted to build a GUI component. I don't believe any significant benefit to the CLI version would be achieved in Python when most important calls are file-system related: Simple text-record processing. Such taks are the domain of *nix core utils, even if Bash's language structure isn't refined like Python.. prove me wrong!
+
+  Description:
+
+The primary goal is to simplify the task of downloading youtube videos with youtube-dl. youtube-dl offers extensive options for many functions for specific functionality. While this is good; We can simplify the arguments passed based on a limited / frequent use scenario. Combining options such as preferred formats and rate limitation into the script we can reduce the passed arguments to an absolute minumum. Also shaving off the -tac and numbers on format settings means a short script title to remember, a single letter for quality followed by the url, which is usually copied and pasted resulting in very few keystrokes.
+
+In essence, a lazy youtube-dl. Perfect for when your feet are up, morning coffee in hand & you're limited to typing with a few fingers from your comfy chair. Lastly we send a 'download complete' message to the GUI - because we have better things to do than stare at download progress screen - like drinking coffee & watching  previously downloaded videos in fullscreen without buffering and the slowness of vile browser plugins etc :) .
+
+Extra to the simple tasks listed above, the script only attempts to download nasty (oh noes bias) mp4 video's where the preferred free webm format is not available - I haven't given up on VP8, even if google has.
+
+Extending the script with further formats should be trivial. IMO the 3 quality settings more than adequately cover a range of aspect ratios and formats currently offered by youtube 1080p, 720p & 480p)
+
+
