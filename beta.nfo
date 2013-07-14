@@ -1,0 +1,14 @@
+The Bleedign edge!
+------------------
+
+So, we almost had a filename of undocumented.txt which would have been ironic. In essence two 
+new features where added that are not listed in the -h menu.
+
+  ms - add medium quality and start in one command
+  t  - pushes the last video added to the top
+
+The coding for both works, but is simplistic and just gets the job done quick and dirty.
+
+For the [x]s option to be implemented fully, the argument parsing needs to be rewritten to 
+actually parse as opposed to expecting options seperately and in sequence.
+
