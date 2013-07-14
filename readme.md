@@ -1,6 +1,6 @@
 Youtube Get
 
-A simple low argument bash front wrapper and sequential download queue for youtube-dl...at least once it’s configured for your environment.
+A simple low argument bash wrapper and download queue for youtube-dl...at least once it’s configured for your environment.
 
 The basic idea is that we pre-configure the (my!) most used options to simplify use. That and yg will stack and sequentially download videos added making it a huge time-saver.
 
