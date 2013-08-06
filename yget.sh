@@ -22,20 +22,21 @@ BLOCK_COMMENT
 
   # version
 
-VERSION="3.1.4.beta";                          # major.minor.point.stage
+VERSION="3.1.5.beta";                          # major.minor.point.stage
 
   # user settings
 
 DOWN_STREAM_RATE="1600K";                      # ~75% of connection speed is good
 OUTPUT_PATH="$HOME/Videos";                    # where to put downloaded videos
 NOTIFY_ICON="/usr/share/icons/Faenza/apps/scalable/youtube.svg"; # url to icon used in GUI notifications
-DATABASE="/tmp/yg.db";                         # where to place working video queue
+DATABASEPATH=$HOME/.local/share/yget;
+DATABASE="$DATABASEPATH/yg.db";                # where to place working video queue
 
   # dev options
 
 DEBUG="N";                                     # output debug information if "Y"
 
-  # global variables
+  # global variables /vomit
 
 ALREADY_RUNNING="FALSE";                       # ensure only 1 download per system
 ARGUMENT="$1";                                 # user function select / script clarity
@@ -64,23 +65,6 @@ function Convert_Quality {
 }
 
 function Convert_Format_To_String {            # youtube only, rest fall into the 'unknown' category, but should work
-#  case "$ACTUAL_FORMAT" in
-#    38)  FORMAT_STRING="3072p format $ACTUAL_FORMAT - MP4"; ;;
-#    46)  FORMAT_STRING="1080p format $ACTUAL_FORMAT - WebM"; ;;
-#    37)  FORMAT_STRING="1080p format $ACTUAL_FORMAT - MP4"; ;;
-#    45)  FORMAT_STRING="720p format $ACTUAL_FORMAT - WebM"; ;;
-#    22)  FORMAT_STRING="720p format $ACTUAL_FORMAT - MP4"; ;;
-#    44)  FORMAT_STRING="480p format $ACTUAL_FORMAT - WebM"; ;;
-#    35)  FORMAT_STRING="480p format $ACTUAL_FORMAT - FLV"; ;;
-#    43)  FORMAT_STRING="360p format $ACTUAL_FORMAT - WebM"; ;;
-#    18)  FORMAT_STRING="360p format $ACTUAL_FORMAT - MP4"; ;;
-#    34)  FORMAT_STRING="360p format $ACTUAL_FORMAT - FLV"; ;;
-#    6)   FORMAT_STRING="270p format $ACTUAL_FORMAT - FLV"; ;;
-#    5)   FORMAT_STRING="240p format $ACTUAL_FORMAT - FLV"; ;;
-#    36)  FORMAT_STRING="240p format $ACTUAL_FORMAT - 3GP"; ;;
-#    17)  FORMAT_STRING="144p format $ACTUAL_FORMAT - 3GP"; ;;
-#    *)   FORMAT_STRING="Unknown format $ACTUAL_FORMAT"; ;;
-#  esac;
   FORMAT_STRING="$ACTUAL_FORMAT";
 }
 
@@ -299,6 +283,22 @@ function Add_mq_and_Download {
   Download;
 }
 
+function CheckYGetDir {
+  #check database directory exists, if not make it, if error exit script
+  YGETDIR=$HOME/.local/share/yget
+  if [ -d $YGETDIR ]; then
+     echo -n
+  else
+    mkdir -p $YGETDIR
+    if [ -d "$YGETDIR" ]; then
+      echo -n
+    else
+      echo Error: Could not create $YGETDIR;
+      exit 1;
+    fi
+  fi
+}
+
 function Download {
   Check_If_Running;                            # check if already downloading a video..
   if [ "$ALREADY_RUNNING" = "FALSE" ]; then    # ..if not running, continue
@@ -333,6 +333,7 @@ function Download {
 #-------------------------------------------------------------------------------
 
 function Main {
+  CheckYGetDir;
   cd $OUTPUT_PATH;
   case "$ARGUMENT" in                          # menu: compare commandline input to menu options
     [hml]) Add_Record; ;;                      # if user option = l/m/h .. add url
@@ -354,10 +355,6 @@ function Main {
 
   Main;
   exit 0;
-
-  # bash script end
-
-#-------------------------------------------------------------------------------
 
   # The End.
 
