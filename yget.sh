@@ -64,23 +64,24 @@ function Convert_Quality {
 }
 
 function Convert_Format_To_String {            # youtube only, rest fall into the 'unknown' category, but should work
-  case "$ACTUAL_FORMAT" in
-    38)  FORMAT_STRING="3072p format $ACTUAL_FORMAT - MP4"; ;;
-    46)  FORMAT_STRING="1080p format $ACTUAL_FORMAT - WebM"; ;;
-    37)  FORMAT_STRING="1080p format $ACTUAL_FORMAT - MP4"; ;;
-    45)  FORMAT_STRING="720p format $ACTUAL_FORMAT - WebM"; ;;
-    22)  FORMAT_STRING="720p format $ACTUAL_FORMAT - MP4"; ;;
-    44)  FORMAT_STRING="480p format $ACTUAL_FORMAT - WebM"; ;;
-    35)  FORMAT_STRING="480p format $ACTUAL_FORMAT - FLV"; ;;
-    43)  FORMAT_STRING="360p format $ACTUAL_FORMAT - WebM"; ;;
-    18)  FORMAT_STRING="360p format $ACTUAL_FORMAT - MP4"; ;;
-    34)  FORMAT_STRING="360p format $ACTUAL_FORMAT - FLV"; ;;
-    6)   FORMAT_STRING="270p format $ACTUAL_FORMAT - FLV"; ;;
-    5)   FORMAT_STRING="240p format $ACTUAL_FORMAT - FLV"; ;;
-    36)  FORMAT_STRING="240p format $ACTUAL_FORMAT - 3GP"; ;;
-    17)  FORMAT_STRING="144p format $ACTUAL_FORMAT - 3GP"; ;;
-    *)   FORMAT_STRING="Unknown format $ACTUAL_FORMAT"; ;;
-  esac;
+#  case "$ACTUAL_FORMAT" in
+#    38)  FORMAT_STRING="3072p format $ACTUAL_FORMAT - MP4"; ;;
+#    46)  FORMAT_STRING="1080p format $ACTUAL_FORMAT - WebM"; ;;
+#    37)  FORMAT_STRING="1080p format $ACTUAL_FORMAT - MP4"; ;;
+#    45)  FORMAT_STRING="720p format $ACTUAL_FORMAT - WebM"; ;;
+#    22)  FORMAT_STRING="720p format $ACTUAL_FORMAT - MP4"; ;;
+#    44)  FORMAT_STRING="480p format $ACTUAL_FORMAT - WebM"; ;;
+#    35)  FORMAT_STRING="480p format $ACTUAL_FORMAT - FLV"; ;;
+#    43)  FORMAT_STRING="360p format $ACTUAL_FORMAT - WebM"; ;;
+#    18)  FORMAT_STRING="360p format $ACTUAL_FORMAT - MP4"; ;;
+#    34)  FORMAT_STRING="360p format $ACTUAL_FORMAT - FLV"; ;;
+#    6)   FORMAT_STRING="270p format $ACTUAL_FORMAT - FLV"; ;;
+#    5)   FORMAT_STRING="240p format $ACTUAL_FORMAT - FLV"; ;;
+#    36)  FORMAT_STRING="240p format $ACTUAL_FORMAT - 3GP"; ;;
+#    17)  FORMAT_STRING="144p format $ACTUAL_FORMAT - 3GP"; ;;
+#    *)   FORMAT_STRING="Unknown format $ACTUAL_FORMAT"; ;;
+#  esac;
+  FORMAT_STRING="$ACTUAL_FORMAT";
 }
 
 function Output_Options {
