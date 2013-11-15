@@ -21,9 +21,9 @@ BLOCK_COMMENT
 # Update to 3.1.6.beta by OblongOrange 2013/15/11
 # Now adds the video quality value to the end of the downloaded video filename (see
 # old Known Limitation (2.1) in docs/knownbugs.txt)
-# Check_If_Running function updated to not stop the downloads beginning if
-# the user is also running 'man youtube-dl', although this now introduces other
-# issues with any prefixed commands such as sudo.
+# Update to 3.1.7.beta by OblongOrange 2013/15/11
+# Check_If_Running function updated to check for the existence of the youtube-dl
+# process itself, and no longer finds all lines containing 'youtube-dl'
 
 #-------------------------------------------------------------------------------
 
@@ -130,8 +130,8 @@ function Delete_DB {
 }
 
 function Check_If_Running {
-  theProcess=(`ps ax | grep -v grep | grep youtube-dl`);     # get process list with all youtube-dl entrie
-  if [ "${theProcess[4]}" = "youtube-dl" ]; then                 # .. the fourth array item if running
+  ps acx | grep youtube-dl > /dev/null;                   # get process-only list with any youtube-dl entries
+  if [ "$?" = "0" ]; then                                 # .. 0 if running
     ALREADY_RUNNING="TRUE";                               # yes? return true
   else
     ALREADY_RUNNING="FALSE";                              # no? return false

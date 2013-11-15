@@ -8,4 +8,4 @@
 
 2.1. (Fixed in 3.1.6.beta) Requesting successive downloads of the same video with a different format eg download successfully with h, then try with m or l will result in no further downloads. if you need different formats: manually rename previously downloaded files. - Could Fix, Won't Fix.
 
-2.2. If the youtube-dl program is running using another process such as "sudo youtube-dl blah" then it will not be detected as running.
+2.2. (Fixed in 3.1.7.beta) If the youtube-dl program is running using another process such as "sudo youtube-dl blah" then it will not be detected as running.
