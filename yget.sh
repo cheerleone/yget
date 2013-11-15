@@ -29,7 +29,7 @@ BLOCK_COMMENT
 
   # version
 
-VERSION="3.1.6.beta";                          # major.minor.point.stage
+VERSION="3.1.7.beta";                          # major.minor.point.stage
 
   # user settings
 
