@@ -18,16 +18,23 @@ You should have received a copy of the GNU General Public License along with thi
 
 BLOCK_COMMENT
 
+# Update to 3.1.6.beta by OblongOrange 2013/15/11
+# Now adds the video quality value to the end of the downloaded video filename (see
+# old Known Limitation (2.1) in docs/knownbugs.txt)
+# Check_If_Running function updated to not stop the downloads beginning if
+# the user is also running 'man youtube-dl', although this now introduces other
+# issues with any prefixed commands such as sudo.
+
 #-------------------------------------------------------------------------------
 
   # version
 
-VERSION="3.1.5.beta";                          # major.minor.point.stage
+VERSION="3.1.6.beta";                          # major.minor.point.stage
 
   # user settings
 
 DOWN_STREAM_RATE="1600K";                      # ~75% of connection speed is good
-OUTPUT_PATH="$HOME/Videos";                    # where to put downloaded videos
+OUTPUT_PATH="$HOME/video";                    # where to put downloaded videos
 NOTIFY_ICON="/usr/share/icons/Faenza/apps/scalable/youtube.svg"; # url to icon used in GUI notifications
 DATABASEPATH=$HOME/.local/share/yget;
 DATABASE="$DATABASEPATH/yg.db";                # where to place working video queue
@@ -123,8 +130,8 @@ function Delete_DB {
 }
 
 function Check_If_Running {
-  ps ax | grep -v grep | grep youtube-dl > /dev/null;     # check process list for youtube-dl
-  if [ "$?" = "0" ]; then                                 # .. 0 if running
+  theProcess=(`ps ax | grep -v grep | grep youtube-dl`);     # get process list with all youtube-dl entrie
+  if [ "${theProcess[4]}" = "youtube-dl" ]; then                 # .. the fourth array item if running
     ALREADY_RUNNING="TRUE";                               # yes? return true
   else
     ALREADY_RUNNING="FALSE";                              # no? return false
@@ -299,6 +306,19 @@ function CheckYGetDir {
   fi
 }
 
+# Creates the global variable $OUTPUT_TEMPLATE with the video title, id, and
+# user selected video quality value. $OUTPUT_TEMPLATE provides
+# the template in the format for --output option discussed in the 
+# manual entry for youtube-dl 
+# Added 2013/11/15 by OblongOrange
+function Create_Output_Template {
+  case "$REQUESTED_FORMAT" in
+    46) OUTPUT_TEMPLATE="%(title)s-%(id)s-1080p"; ;;
+    45) OUTPUT_TEMPLATE="%(title)s-%(id)s-720p"; ;;
+    44) OUTPUT_TEMPLATE="%(title)s-%(id)s-480p"; ;;
+  esac
+}
+
 function Download {
   Check_If_Running;                            # check if already downloading a video..
   if [ "$ALREADY_RUNNING" = "FALSE" ]; then    # ..if not running, continue
@@ -310,7 +330,8 @@ function Download {
         fi
         Read_First_Record;                     # populate nasty globals :( from first (top-most) record
         Display_Header;                        # output info from video record
-        youtube-dl -t -r $DOWN_STREAM_RATE --prefer-free-formats --max-quality $REQUESTED_FORMAT "$VIDEO_URL"; # da shiz.
+        Create_Output_Template;                # create the OUTPUT_TEMPLATE for filename (adds quality value to filename)
+        youtube-dl --output $OUTPUT_TEMPLATE -r $DOWN_STREAM_RATE --prefer-free-formats --max-quality $REQUESTED_FORMAT "$VIDEO_URL"; # da shiz.
         if [ "$?" = "0" ]; then                # if youtube-dl returned download success (0) then ..
           Send_GUI_Notification;               # ..send GUI notification
           Delete_First_Record;                 # ..delete record at top of list
