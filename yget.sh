@@ -302,10 +302,10 @@ function CheckYGetDir {
   fi
 }
 
-# Creates the global variable $OUTPUT_TEMPLATE with the video title, id, and user selected video quality value. 
+# Creates the global variable $OUTPUT_TEMPLATE with the video title, id, and youtube-dl returned video quality value. 
 # $OUTPUT_TEMPLATE provides the template in the format for --output option discussed in the # manual entry for youtube-dl 
 # Added 2013/11/15 by OblongOrange
-# Updated to pull data from the format returned form the youtube-dl query ($ACTUAL_FORMAT), adding this where relevant.
+# CL: Updated to get stripped data from the format returned from the youtube-dl url-query ($ACTUAL_FORMAT), adding this where relevant.
 function Create_Output_Template {
   local FMT=;
   FMT=$( echo $ACTUAL_FORMAT | awk {' print $3 '} | cut -dx -f1) # eg return 720 from a string like "22 - 720x1280"
