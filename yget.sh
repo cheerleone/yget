@@ -14,16 +14,12 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-  ** See end of script for endless drivel. **
+Update to 3.1.6.beta by OblongOrange 2013/15/11
+  Now adds the video quality value to the end of the downloaded video filename (see old Known Limitation (2.1) in docs/knownbugs.txt)
+Update to 3.1.7.beta by OblongOrange 2013/15/11
+  Check_If_Running function updated to check for the existence of the youtube-dl Process itself, and no longer finds all lines containing 'youtube-dl'
 
 BLOCK_COMMENT
-
-# Update to 3.1.6.beta by OblongOrange 2013/15/11
-# Now adds the video quality value to the end of the downloaded video filename (see
-# old Known Limitation (2.1) in docs/knownbugs.txt)
-# Update to 3.1.7.beta by OblongOrange 2013/15/11
-# Check_If_Running function updated to check for the existence of the youtube-dl
-# process itself, and no longer finds all lines containing 'youtube-dl'
 
 #-------------------------------------------------------------------------------
 
