@@ -1,10 +1,11 @@
   Known Bugs
 
-Avoiding bash funk. Add "Quotes" to the URls. If quotes are not used, Youtube URLs containing an & will cause youtube-dl to become a background task causing the shell prompt not to appear until enter is pressed after script completion. This is due to the way youtube-dl outputs during use even as a background task and some bash weirdness I haven't had time to research.
+1.1. Avoiding bash funk. Add "Quotes" to the URls. If quotes are not used, Youtube URLs containing an & will cause youtube-dl to become a background task causing the shell prompt not to appear until enter is pressed after script completion. This is due to the way youtube-dl outputs during use even as a background task and some bash weirdness I haven't had time to research.
 
-Youtube changed the way they report some videos. Until one funtion is fixed, the words "unknown format" will appear next to the actual known format.
+1.2. Youtube changed the way they report some videos. Until one funtion is fixed, the words "unknown format" will appear next to the actual known format.
 
   Known Limitations
 
-Requesting successive downloads of the same video with a different format eg download successfully with h, then try with m or l will result in no further downloads. if you need different formats: manually rename previously downloaded files. - Could Fix, Won't Fix.
+2.1. (Fixed in 3.1.6.beta) Requesting successive downloads of the same video with a different format eg download successfully with h, then try with m or l will result in no further downloads. if you need different formats: manually rename previously downloaded files. - Could Fix, Won't Fix.
 
+2.2. (Fixed in 3.1.7.beta) If the youtube-dl program is running using another process such as "sudo youtube-dl blah" then it will not be detected as running.
