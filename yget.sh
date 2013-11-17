@@ -29,12 +29,12 @@ BLOCK_COMMENT
 
   # version
 
-VERSION="3.1.7.beta";                          # major.minor.point.stage
+VERSION="3.1.8.beta";                          # major.minor.point.stage
 
   # user settings
 
-DOWN_STREAM_RATE="1600K";                      # ~75% of connection speed is good
-OUTPUT_PATH="$HOME/video";                    # where to put downloaded videos
+DOWN_STREAM_RATE="5600K";                      # ~75% of connection speed is good
+OUTPUT_PATH="$HOME/Videos";                    # where to put downloaded videos
 NOTIFY_ICON="/usr/share/icons/Faenza/apps/scalable/youtube.svg"; # url to icon used in GUI notifications
 DATABASEPATH=$HOME/.local/share/yget;
 DATABASE="$DATABASEPATH/yg.db";                # where to place working video queue
@@ -310,13 +310,16 @@ function CheckYGetDir {
 # user selected video quality value. $OUTPUT_TEMPLATE provides
 # the template in the format for --output option discussed in the 
 # manual entry for youtube-dl 
-# Added 2013/11/15 by OblongOrange
+# Added 2013/11/15 by OblongOrange - CL: added appendage variable, code was 100% fine, gedit had a hissy fit due to case/string parsing.
+
 function Create_Output_Template {
+  local APPENDGE=;
   case "$REQUESTED_FORMAT" in
-    46) OUTPUT_TEMPLATE="%(title)s-%(id)s-1080p"; ;;
-    45) OUTPUT_TEMPLATE="%(title)s-%(id)s-720p"; ;;
-    44) OUTPUT_TEMPLATE="%(title)s-%(id)s-480p"; ;;
+    46) APPENDAGE="-1080p"; ;;
+    45) APPENDAGE="-720p"; ;;
+    44) APPENDAGE="-480p"; ;;
   esac
+  OUTPUT_TEMPLATE="%(title)s-%(id)s$APPENDAGE";
 }
 
 function Download {
