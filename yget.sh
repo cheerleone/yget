@@ -37,7 +37,7 @@ DATABASE="$DATABASEPATH/yg.db";                # where to place working video qu
 
   # dev options
 
-DEBUG="N";                                     # output debug information if "Y"
+DEBUG="Y";                                     # output debug information if "Y"
 
   # global variables /vomit
 
@@ -302,20 +302,21 @@ function CheckYGetDir {
   fi
 }
 
-# Creates the global variable $OUTPUT_TEMPLATE with the video title, id, and
-# user selected video quality value. $OUTPUT_TEMPLATE provides
-# the template in the format for --output option discussed in the 
-# manual entry for youtube-dl 
-# Added 2013/11/15 by OblongOrange - CL: added appendage variable, code was 100% fine, gedit had a hissy fit due to case/string parsing.
-
+# Creates the global variable $OUTPUT_TEMPLATE with the video title, id, and user selected video quality value. 
+# $OUTPUT_TEMPLATE provides the template in the format for --output option discussed in the # manual entry for youtube-dl 
+# Added 2013/11/15 by OblongOrange
+# Updated to pull data from the format returned form the youtube-dl query ($ACTUAL_FORMAT), adding this where relevant.
 function Create_Output_Template {
-  local APPENDGE=;
-  case "$REQUESTED_FORMAT" in
-    46) APPENDAGE="-1080p"; ;;
-    45) APPENDAGE="-720p"; ;;
-    44) APPENDAGE="-480p"; ;;
+  local FMT=;
+  FMT=$( echo $ACTUAL_FORMAT | awk {' print $3 '} | cut -dx -f1) # eg return 720 from a string like "22 - 720x1280"
+  case "$FMT" in
+    "360"  ) FMT="-"$FMT"p" ; ;;               # add "p" to $FTM if the format fits any of the values below
+    "480"  ) FMT="-"$FMT"p" ; ;;
+    "720"  ) FMT="-"$FMT"p" ; ;;
+    "1080" ) FMT="-"$FMT"p" ; ;;
+    *      ) FMT="" ; ;;                       # otherwise set $FMT to an empty string.    
   esac
-  OUTPUT_TEMPLATE="%(title)s-%(id)s$APPENDAGE";
+  OUTPUT_TEMPLATE="%(title)s-%(id)s$FMT";
 }
 
 function Download {
