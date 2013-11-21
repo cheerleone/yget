@@ -19,11 +19,9 @@ reload your .bashrc file with
 
      source ~/.bashrc
      
-then run yget simply by typing yg
-
 For help type:
 
- yg -h | more
+    yg -h | more
 
 Lastly, if your youtube links contain the “&” character, be sure to encapsulate the url in quotes, otherwise the & will fork back to the command line, but continue to output script messages.
 
