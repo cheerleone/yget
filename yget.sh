@@ -37,7 +37,7 @@ DATABASE="$DATABASEPATH/yg.db";                # where to place working video qu
 
   # dev options
 
-DEBUG="Y";                                     # output debug information if "Y"
+DEBUG="N";                                     # output debug information if "Y"
 
   # global variables /vomit
 
@@ -65,10 +65,6 @@ function Convert_Quality {
     m)  REQUESTED_FORMAT="45"; ;;
     l)  REQUESTED_FORMAT="44"; ;;
   esac
-}
-
-function Convert_Format_To_String {            # youtube only, rest fall into the 'unknown' category, but should work
-  FORMAT_STRING="$ACTUAL_FORMAT";
 }
 
 function Output_Options {
@@ -135,7 +131,6 @@ function Check_If_Running {
 }
 
 function Add_Record {
-#  Convert_Quality;      
   Query_URL;
   if [ "$URL_OK" = "TRUE" ]; then
     echo "Adding: $VIDEO_TITLE";
@@ -162,7 +157,6 @@ function List_Titles_In_DB {
   local RECORD_INDEX=1;                                        # points to current record being read / output
   Count_Records;                                               # determine how many videos queued in DB
   if [ $RECORDS_IN_DB -ne 0 ]; then                            #
-#    echo "Videos in queue..";                                  #
     while [ $RECORD_INDEX -le $RECORDS_IN_DB ]; do             #
       VIDEO_TITLE=$( sed -n -e "$RECORD_INDEX"p $DATABASE | cut -d@ -f4 );  # extract title from 4th field in line n of DB
       echo " $RECORD_INDEX, $VIDEO_TITLE";                     #
@@ -183,7 +177,6 @@ function List_Titles_In_DB_Loop {
 }
 
 function Display_Header {
-  Convert_Format_To_String;
   echo;
   echo "D/S Rate          : $DOWN_STREAM_RATE";
   echo "Downloading       : $VIDEO_TITLE";  
@@ -195,7 +188,7 @@ function Display_Header {
     45) echo "Requested Format  : 720p format $REQUESTED_FORMAT - WebM"; ;;
     44) echo "Requested Format  : 480p format $REQUESTED_FORMAT - WebM"; ;;
   esac
-  echo "Actual Format     : $FORMAT_STRING";
+  echo "Actual Format     : $ACTUAL_FORMAT";
   echo "D/L Remaining     : $RECORDS_IN_DB";
   if [ $DL_ERRORS -ne 0 ]; then
     echo "D/L Errors        : $DL_ERRORS (max: $MAX_DL_ERRORS)";
@@ -377,5 +370,5 @@ function Main {
   Main;
   exit 0;
 
-  # The End.
+# The End.
 
