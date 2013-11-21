@@ -18,3 +18,10 @@
 3.3 Youtube changed the way they report the format of videos. 
 ** (altered code to side-step the issue, more reliance is now placed on the returned format from the url query, this has the downside of queries that don't return a format, such as non-youtube links, will produce downloads without an identifying format sudh as 720p)**
 
+  Future Updates
+
+4.1 To properly detect the running state of youtube-dl we should really grep for the python line containing youtube-dl and a known string used always in our download process and not other types of call such as man or forced version updates. Thus constant strings such as "--prefer-free-formats" and "--max-quality" could be used to differentiate.
+
+4.2 Better list sorting: Need push, pop, alpha sort (ascending & descending) & numerical (pick from list to move to top), possibly size.
+
+

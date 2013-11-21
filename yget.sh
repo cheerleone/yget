@@ -25,7 +25,7 @@ BLOCK_COMMENT
 
   # version
 
-VERSION="3.1.8.beta";                          # major.minor.point.stage
+VERSION="3.1.9.beta";                          # major.minor.point.stage
 
   # user settings
 
@@ -316,7 +316,7 @@ function Create_Output_Template {
     "1080" ) FMT="-"$FMT"p" ; ;;
     *      ) FMT="" ; ;;                       # otherwise set $FMT to an empty string.    
   esac
-  OUTPUT_TEMPLATE="%(title)s-%(id)s$FMT";
+  OUTPUT_TEMPLATE="%(title)s-%(id)s$FMT.%(ext)s";
 }
 
 function Download {
