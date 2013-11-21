@@ -25,7 +25,7 @@ Bash and aliases, I strongly recommend adding an alias to your ~/.bashrc file su
 
 reload your .bashrc file with:
 
-     source ~/.bashrc
+    source ~/.bashrc
      
 For help type:
 
