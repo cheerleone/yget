@@ -17,9 +17,13 @@ DATABASE - file where yget stores temporary data eg /tmp/somefile
 Bash and aliases
 I strongly recommend adding an alias to your ~/.bashrc file such as:
 
-alias yg='$HOME/scripts/yget.sh'
+     alias yg='$HOME/scripts/yget.sh'
 
-Close and re-open your terminal after adding the line above, then run yget simply by typing yg
+reload your .bashrc file with 
+
+     source ~/.bashrc
+     
+then run yget simply by typing yg
 
 For help type:
 
