@@ -2,7 +2,7 @@ Youtube Get
 
 A simple low argument bash wrapper and download queue for youtube-dl
 
-The basic idea is that we pre-configure the most used options to simplify repetitive use. This could be accomplished with a tiny script. yget started this way but evolved to maintain a list of videos to download sequentially, allowing for the seperation between video discovery and watching later, perhaps more comfortably via XBMC and a TV ;-)
+The basic idea is that we pre-configure the most used options to simplify repetitive use. This could be accomplished with a tiny script. yget started this way but evolved to maintain a list of videos to download sequentially, allowing for the seperation between video discovery and later viewing. Perhaps more comfortably via XBMC and a TV ;-)
 
 Prerequisites:
 
