@@ -6,14 +6,14 @@ The basic idea is that we pre-configure the (my!) most used options to simplify 
 
 Important setup notes: Edit script to configure user environment settings:
 
-  DOWN_STREAM_RATE - use to cap the bandwidth youtube dl will use
-  OUTPUT_PATH - where your videos will be saved
-  NOTIFY_ICON - the icon to use for desktop notifications
-  DATABASE - file where yget stores temporary data eg /tmp/somefile
+    DOWN_STREAM_RATE - use to cap the bandwidth youtube dl will use
+    OUTPUT_PATH - where your videos will be saved
+    NOTIFY_ICON - the icon to use for desktop notifications
+    DATABASE - file where yget stores temporary data eg /tmp/somefile
 
 Bash and aliases, I strongly recommend adding an alias to your ~/.bashrc file such as:
 
-     alias yg='$HOME/scripts/yget.sh'
+    alias yg='$HOME/scripts/yget.sh'
 
 reload your .bashrc file with 
 
