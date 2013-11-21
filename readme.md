@@ -16,8 +16,7 @@ Important setup notes: Edit script to configure user environment settings:
     OUTPUT_PATH      - where your videos will be saved
     NOTIFY_ICON      - the icon to use for desktop notifications
     DATABASE         - file where yget stores temporary data eg /tmp/somefile
-    
-      These Settings should be moved to a config file in a future update.
+These Settings should be moved to a config file in a future update.
 
 Bash and aliases, I strongly recommend adding an alias to your ~/.bashrc file such as:
 
