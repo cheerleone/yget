@@ -121,7 +121,7 @@ function Delete_DB {
 }
 
 function Check_If_Running {
-#  ps acx | grep youtube-dl > /dev/null;  # does acx does not work for scripts only executable files.
+#  ps acx | grep youtube-dl > /dev/null;  # acx does not work for scripts only executable files.
   ps ax | grep youtube-dl | grep -v grep | grep prefer-free > /dev/null;  #  reverted to original + extra test for running state parameter
   if [ "$?" = "0" ]; then                                 # .. 0 if running
     ALREADY_RUNNING="TRUE";                               # yes? return true
