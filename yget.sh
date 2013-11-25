@@ -25,7 +25,7 @@ BLOCK_COMMENT
 
   # version
 
-VERSION="3.1.9.beta";                          # major.minor.point.stage
+VERSION="3.1.10.beta";                         # major.minor.point.stage
 
   # user settings
 
@@ -47,13 +47,12 @@ REQUESTED_FORMAT=;                             # 1080p, 720p etc supplied to $1 
 VIDEO_TITLE=;                                  # title
 VIDEO_URL="$2";                                # URL to video
 URL_OK="FALSE";                                # return from youtube-dl initial call (ret. TRUE if URL was good)
-PREFIX="1006665b__";                           # basic record id. / good for record grep / future asv header
+PREFIX="__100__";                              # basic record id. / good for record grep / future asv header
 RECORDS_IN_DB=;                                # cosmetic output and loop end determination
 ACTUAL_FORMAT=;                                # cosmetic user notification of the video format thtat will be downloaded
-FORMAT_STRING=;                                # cosmetic user output
 DL_ERRORS=0;                                   # counter for determining how many times youtube-dl exited abnormally
 MAX_DL_ERRORS=8;                               # .. abnormal exit cap
-ERROR_TIME=24;				                         # number of seconds to wait after an error.
+ERROR_TIME=16;                                 # number of seconds to wait after an error.
 
 #-------------------------------------------------------------------------------
 
@@ -122,7 +121,8 @@ function Delete_DB {
 }
 
 function Check_If_Running {
-  ps acx | grep youtube-dl > /dev/null;                   # get process-only list with any youtube-dl entries
+#  ps acx | grep youtube-dl > /dev/null;  # does acx does not work for scripts only executable files.
+  ps ax | grep youtube-dl | grep -v grep | grep prefer-free > /dev/null;  #  reverted to original + extra test for running state parameter
   if [ "$?" = "0" ]; then                                 # .. 0 if running
     ALREADY_RUNNING="TRUE";                               # yes? return true
   else
@@ -142,7 +142,7 @@ function Add_Record {
 }
 
 function Add_Record_Internal {
-    echo "$PREFIX@$REQUESTED_FORMAT@$VIDEO_URL@$VIDEO_TITLE@$ACTUAL_FORMAT" >> $DATABASE;
+  echo "$PREFIX@$REQUESTED_FORMAT@$VIDEO_URL@$VIDEO_TITLE@$ACTUAL_FORMAT" >> $DATABASE;
 }
 
 function Count_Records {
