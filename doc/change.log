@@ -1,2 +1,4 @@
 3.1.9.b
   added filetype extension to template output
+3.1.10.b
+  fixed process monitoring regression
