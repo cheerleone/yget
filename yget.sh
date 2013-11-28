@@ -25,7 +25,7 @@ BLOCK_COMMENT
 
   # version
 
-VERSION="3.1.10.beta";                         # major.minor.point.stage
+VERSION="3.1.11.beta";                         # major.minor.point.stage
 
   # user settings
 
@@ -344,6 +344,19 @@ function Download {
   fi                                           # end if - already running 
 }
 
+function Poll_Queue {
+# setup automatic screen injection & check screen existence
+  while [ 1 == 1 ]; do
+    echo "Polling ..";
+    if [ -f $DATABASE ]; then
+      Download;
+    else
+      echo "Sleeping 10s...";
+      sleep 10;
+    fi
+  done
+}
+
 #-------------------------------------------------------------------------------
 
 function Main {
@@ -360,7 +373,8 @@ function Main {
     v) Show_Version; ;;                        # too confusing to write a comment for
     p) Push_First_Record_To_Last; ;;           #
     t) Push_Last_Record_To_Top; ;;
-    *) Output_Options; ;;
+    P) Poll_Queue; ;;                          # if used with screen etc, can sit in background waiting for d/l requests
+    *) Output_Options; ;;                      # help
   esac
   echo;
 }
