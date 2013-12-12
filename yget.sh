@@ -25,7 +25,7 @@ BLOCK_COMMENT
 
   # version
 
-VERSION="3.1.11.beta";                         # major.minor.point.stage
+VERSION="3.1.12.beta";                         # major.minor.point.stage
 
   # user settings
 
@@ -159,7 +159,7 @@ function List_Titles_In_DB {
   if [ $RECORDS_IN_DB -ne 0 ]; then                            #
     while [ $RECORD_INDEX -le $RECORDS_IN_DB ]; do             #
       VIDEO_TITLE=$( sed -n -e "$RECORD_INDEX"p $DATABASE | cut -d@ -f4 );  # extract title from 4th field in line n of DB
-      echo " $RECORD_INDEX, $VIDEO_TITLE";                     #
+      echo " $RECORD_INDEX $VIDEO_TITLE";                     #
       RECORD_INDEX=$( expr $RECORD_INDEX + 1 );                #
     done                                                       #
   else                                                         #
@@ -298,18 +298,17 @@ function CheckYGetDir {
 # Creates the global variable $OUTPUT_TEMPLATE with the video title, id, and youtube-dl returned video quality value. 
 # $OUTPUT_TEMPLATE provides the template in the format for --output option discussed in the # manual entry for youtube-dl 
 # Added 2013/11/15 by OblongOrange
-# CL: Updated to get stripped data from the format returned from the youtube-dl url-query ($ACTUAL_FORMAT), adding this where relevant.
+# Updated to transform the returned queried format from youtube-dl
+# 2013/Dec/11 CL Fixed for new bug in youtube returned format, can read either 720x1280 or 1280x720, so using both dimensions instead of just frame height
+# -Ideally this function would transform to always get height by sorting. Possibly more complicated than required given the simple solution below.
 function Create_Output_Template {
   local FMT=;
-  FMT=$( echo $ACTUAL_FORMAT | awk {' print $3 '} | cut -dx -f1) # eg return 720 from a string like "22 - 720x1280"
-  case "$FMT" in
-    "360"  ) FMT="-"$FMT"p" ; ;;               # add "p" to $FTM if the format fits any of the values below
-    "480"  ) FMT="-"$FMT"p" ; ;;
-    "720"  ) FMT="-"$FMT"p" ; ;;
-    "1080" ) FMT="-"$FMT"p" ; ;;
-    *      ) FMT="" ; ;;                       # otherwise set $FMT to an empty string.    
-  esac
-  OUTPUT_TEMPLATE="%(title)s-%(id)s$FMT.%(ext)s";
+  FMT=$( echo $ACTUAL_FORMAT | awk {' print $3 '} )  # store resolution (3rd) string from returned format query
+  if [[ "$FMT" != "" ]]; then
+    OUTPUT_TEMPLATE="%(title)s-%(id)s-$FMT.%(ext)s"; # add format to template if one was provided
+  else
+    OUTPUT_TEMPLATE="%(title)s-%(id)s.%(ext)s";      # skip format if none returned
+  fi  
 }
 
 function Download {
@@ -351,8 +350,8 @@ function Poll_Queue {
     if [ -f $DATABASE ]; then
       Download;
     else
-      echo "Sleeping 10s...";
-      sleep 10;
+      echo "Sleeping 2s...";
+      sleep 2;
     fi
   done
 }

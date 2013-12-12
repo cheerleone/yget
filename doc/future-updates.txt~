@@ -6,6 +6,6 @@ Better list sorting: Need push, pop, alpha sort (ascending & descending) & numer
 
 export user globals to a config file utilizing a function to read the file, and populate the file with defaults if it doesn't exist. The file should be placed in the same place as the database. 
 
-Add per record random ID# use to grep & delete records instead of top record. this will help if running instances of yget on different machines, and one sorts the db, while the other deletes the top record, could shorten youtube url to it's vID.
+Add per record random ID# use to grep & delete records instead of top record. this will help if running instances of yget on different machines, and one sorts the db, while the other deletes the top record.
 
 
