@@ -32,7 +32,7 @@ VERSION="3.1.14.beta";                         # major.minor.point.stage
 DOWN_STREAM_RATE="5600K";                      # ~75% of connection speed is good
 OUTPUT_PATH="$HOME/Videos";                    # where to put downloaded videos
 NOTIFY_ICON="/usr/share/icons/Faenza/apps/scalable/youtube.svg"; # url to icon used in GUI notifications
-DATABASEPATH=$HOME/RemoteFS/ms-tv;
+DATABASEPATH=$HOME/.local/share/yget;
 DATABASE="$DATABASEPATH/yg.db";                # where to place working video queue
 
   # dev options
