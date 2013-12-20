@@ -25,14 +25,14 @@ BLOCK_COMMENT
 
   # version
 
-VERSION="3.1.12.beta";                         # major.minor.point.stage
+VERSION="3.1.14.beta";                         # major.minor.point.stage
 
   # user settings
 
 DOWN_STREAM_RATE="5600K";                      # ~75% of connection speed is good
 OUTPUT_PATH="$HOME/Videos";                    # where to put downloaded videos
 NOTIFY_ICON="/usr/share/icons/Faenza/apps/scalable/youtube.svg"; # url to icon used in GUI notifications
-DATABASEPATH=$HOME/.local/share/yget;
+DATABASEPATH=$HOME/RemoteFS/ms-tv;
 DATABASE="$DATABASEPATH/yg.db";                # where to place working video queue
 
   # dev options
@@ -102,9 +102,21 @@ function Show_Version {
   echo $VERSION;
 }
 
+function Expand_URL {                                         # if the usual URL variable passed on commandline is char "c" get URL from clipboard
+  if [[ "$VIDEO_URL" = "c" ]]; then
+    if [ -f "/usr/bin/xclip" ]; then                          # checked inside 1st if to make xclip a soft dependency, if 2nd argument is a full URL, this code will not execute
+      VIDEO_URL=$(xclip -o);                                  # get url from clipboard
+    else
+      echo "xclip is required to expand a URL from the clipboard."
+      exit 2
+    fi
+  fi    
+}
+
 function Query_URL {
   local QUERY_RETURN=;
   Convert_Quality;
+  Expand_URL;
   echo; echo "Querying Video..";
   QUERY_RETURN=$( youtube-dl -e --get-title --get-format --prefer-free-formats --max-quality $REQUESTED_FORMAT $VIDEO_URL );
   if [ "$?" = "0" ]; then                                     # if youtube-dl url query succeeded ..
@@ -143,6 +155,42 @@ function Add_Record {
 
 function Add_Record_Internal {
   echo "$PREFIX@$REQUESTED_FORMAT@$VIDEO_URL@$VIDEO_TITLE@$ACTUAL_FORMAT" >> $DATABASE;
+}
+
+function Advance_Spinner {
+  local CHARS="|/-\\";
+  echo -n "${CHARS:$SPINDEX:1} ";
+  echo -ne "$pc\033[0K\r"
+  (( SPINDEX++ ));
+  if [ $SPINDEX = 5 ]; then
+    SPINDEX=0;
+  fi   
+}
+
+function Poll_Clipboard {
+  local CLIP_CURRENT="";
+  local CLIP_CHECK="hsid8fyuib83riwk3urh";
+  ARGUMENT="m";
+  echo "Polling for Youtube URL's on X Clipboard..   (CTRL+C to stop)"
+  Convert_Quality;  
+  if [ -f "/usr/bin/xclip" ]; then
+    while [ 1 = 1 ]; do
+      CLIP_CURRENT=$(xclip -o);      
+      echo $CLIP_CURRENT | grep "youtube.com/" > /dev/null
+      if [[ "$?" = "0" ]]; then
+        if [[ "$CLIP_CURRENT" != "$CLIP_CHECK" ]]; then          
+          VIDEO_URL=$CLIP_CURRENT;
+          Add_Record;
+          CLIP_CHECK=$CLIP_CURRENT;
+        fi
+      fi
+      sleep 0.2
+      Advance_Spinner;
+    done
+  else
+    echo "xclip is required to for clipboard functionality"
+    exit 2
+  fi
 }
 
 function Count_Records {
@@ -358,7 +406,7 @@ function Poll_Queue {
 
 #-------------------------------------------------------------------------------
 
-function Main {
+function _Main {
   CheckYGetDir;
   cd $OUTPUT_PATH;
   case "$ARGUMENT" in                          # menu: compare commandline input to menu options
@@ -373,6 +421,7 @@ function Main {
     p) Push_First_Record_To_Last; ;;           #
     t) Push_Last_Record_To_Top; ;;
     P) Poll_Queue; ;;                          # if used with screen etc, can sit in background waiting for d/l requests
+    Pcm) Poll_Clipboard; ;;
     *) Output_Options; ;;                      # help
   esac
   echo;
@@ -380,7 +429,7 @@ function Main {
 
 #-------------------------------------------------------------------------------
 
-  Main;
+  _Main;
   exit 0;
 
 # The End.
