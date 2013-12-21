@@ -10,14 +10,17 @@ Prerequisites:
     Python
     Some flavor of *nix. (Fedora keeps youtube-dl updated regularly)
 
-Important setup notes: Edit script to configure user environment settings:
+Important setup notes:
+
+    run yget once to crerate the working directory
+    copy [yget directory]/templates/yget.conf file to $HOME/.local/share/yget/yget.conf
+    edit yget.conf to work with your directory structure
 
     DOWN_STREAM_RATE - use to cap the bandwidth youtube dl will use
     OUTPUT_PATH      - where your videos will be saved
     NOTIFY_ICON      - the icon to use for desktop notifications
     DATABASE         - file where yget stores temporary data eg /tmp/somefile
 
-These Settings should be moved to a config file in a future update.
 
 Bash and aliases, I strongly recommend adding an alias to your ~/.bashrc file such as:
 
