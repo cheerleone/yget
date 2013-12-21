@@ -13,9 +13,7 @@ Prerequisites:
 Important setup notes:
 
 run yget once to crerate the working directory
-
 copy [yget directory]/templates/yget.conf file to $HOME/.local/share/yget/yget.conf
-
 edit yget.conf to work with your directory structure
 
     DOWN_STREAM_RATE - use to cap the bandwidth youtube dl will use
