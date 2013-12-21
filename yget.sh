@@ -25,21 +25,22 @@ BLOCK_COMMENT
 
   # version
 
-VERSION="3.1.15.beta";                         # major.minor.point.stage
+VERSION="3.2.0.beta";                          # major.minor.point.stage
 
-  # user settings
+  # Configuration File
+  
+CONFIG_FILE=$HOME/.local/share/yget/yget.conf  # configuration file to use
 
-DOWN_STREAM_RATE="5600K";                      # ~75% of connection speed is good
-OUTPUT_PATH="$HOME/Videos";                    # where to put downloaded videos
-NOTIFY_ICON="/usr/share/icons/Faenza/apps/scalable/youtube.svg"; # url to icon used in GUI notifications
-DATABASEPATH=$HOME/.local/share/yget;
-DATABASE="$DATABASEPATH/yg.db";                # where to place working video queue
+  # global variables from config file
 
-  # dev options
+DOWN_STREAM_RATE="";                           # ~75% of connection speed is good      -- pulled from config file
+DATABASEPATH="";                               # yget working directory                -- pulled from config file
+DATABASE="";                                   # database filename                     -- pulled from config file
+OUTPUT_PATH="";                                # where to store downloaded videos      -- pulled from config file
+NOTIFY_ICON="";                                # url to icon used in GUI notifications -- pulled from config file
+DEBUG="";                                      # output debug information if "Y"       -- pulled from config file
 
-DEBUG="N";                                     # output debug information if "Y"
-
-  # global variables /vomit
+  # global variables
 
 ALREADY_RUNNING="FALSE";                       # ensure only 1 download per system
 ARGUMENT="$1";                                 # user function select / script clarity
@@ -53,6 +54,7 @@ ACTUAL_FORMAT=;                                # cosmetic user notification of t
 DL_ERRORS=0;                                   # counter for determining how many times youtube-dl exited abnormally
 MAX_DL_ERRORS=8;                               # .. abnormal exit cap
 ERROR_TIME=16;                                 # number of seconds to wait after an error.
+
 
 #-------------------------------------------------------------------------------
 
@@ -170,10 +172,10 @@ function Advance_Spinner {
 function Poll_Clipboard {
   local CLIP_CURRENT="";
   local CLIP_CHECK="hsid8fyuib83riwk3urh";
-  ARGUMENT="m";
-  echo "Polling for Youtube URL's on X Clipboard..   (CTRL+C to stop)"
+  ARGUMENT="m";  
   Convert_Quality;  
   if [ -f "/usr/bin/xclip" ]; then
+    echo "Polling for Youtube URL's on X Clipboard..   (CTRL+C to stop)"
     while [ 1 = 1 ]; do
       CLIP_CURRENT=$(xclip -o);      
       echo $CLIP_CURRENT | grep "youtube.com/" > /dev/null
@@ -343,6 +345,21 @@ function CheckYGetDir {
   fi
 }
 
+function Read_Config_File {  
+  echo "Reading config file..";
+  if [ -f "$CONFIG_FILE" ]; then
+    DOWN_STREAM_RATE=$( cat $CONFIG_FILE | grep _DOWN_STREAM_RATE_ | awk {' print $2 '} );
+    OUTPUT_PATH="$HOME/$( cat $CONFIG_FILE | grep _OUTPUT_PATH_ | awk {' print $2 '} )";
+    DATABASEPATH="$HOME/$( cat $CONFIG_FILE | grep _DATABASEPATH_ | awk {' print $2 '} )";
+    DATABASE="$DATABASEPATH/$( cat $CONFIG_FILE | grep _DATABASE_ | awk {' print $2 '} )";
+    NOTIFY_ICON=$( cat $CONFIG_FILE | grep _NOTIFY_ICON_ | awk {' print $2 '} );
+    DEBUG=$( cat $CONFIG_FILE | grep _DEBUG_ | awk {' print $2 '} );
+  else
+    echo "Configuration file does Not Exist, copy yget.conf from template folder into /home/[user]/.local/share/yget";
+    exit 3
+  fi
+}
+
 # Creates the global variable $OUTPUT_TEMPLATE with the video title, id, and youtube-dl returned video quality value. 
 # $OUTPUT_TEMPLATE provides the template in the format for --output option discussed in the # manual entry for youtube-dl 
 # Added 2013/11/15 by OblongOrange
@@ -371,7 +388,7 @@ function Download {
         Read_First_Record;                     # populate nasty globals :( from first (top-most) record
         Display_Header;                        # output info from video record
         Create_Output_Template;                # create the OUTPUT_TEMPLATE for filename (adds quality value to filename)
-        youtube-dl --output $OUTPUT_TEMPLATE -r $DOWN_STREAM_RATE --prefer-free-formats --max-quality $REQUESTED_FORMAT "$VIDEO_URL"; # da shiz.
+        youtube-dl --output $OUTPUT_TEMPLATE -r $DOWN_STREAM_RATE --prefer-free-formats --max-quality $REQUESTED_FORMAT "$VIDEO_URL"; # pass all relevant data to youtube-dl
         if [ "$?" = "0" ]; then                # if youtube-dl returned download success (0) then ..
           Send_GUI_Notification;               # ..send GUI notification
           Delete_First_Record;                 # ..delete record at top of list
@@ -409,6 +426,7 @@ function Poll_Queue {
 
 function _Main {
   CheckYGetDir;
+  Read_Config_File;
   cd $OUTPUT_PATH;
   case "$ARGUMENT" in                          # menu: compare commandline input to menu options
     [hml]) Add_Record; ;;                      # if user option = l/m/h .. add url
