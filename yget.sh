@@ -162,7 +162,7 @@ function Advance_Spinner {
   echo -n "${CHARS:$SPINDEX:1} ";
   echo -ne "$pc\033[0K\r"
   (( SPINDEX++ ));
-  if [ $SPINDEX = 5 ]; then
+  if [ $SPINDEX = 4 ]; then
     SPINDEX=0;
   fi   
 }
@@ -392,13 +392,14 @@ function Download {
 }
 
 function Poll_Queue {
-# setup automatic screen injection & check screen existence
+# add automatic screen config, check screen existence etc.
+  echo "Polling ..";
   while [ 1 == 1 ]; do
-    echo "Polling ..";
     if [ -f $DATABASE ]; then
       Download;
+      echo "Polling ..";
     else
-      echo "Sleeping 2s...";
+      Advance_Spinner;
       sleep 2;
     fi
   done
