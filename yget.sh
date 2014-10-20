@@ -25,21 +25,22 @@ BLOCK_COMMENT
 
   # version
 
-VERSION="3.1.10.beta";                         # major.minor.point.stage
+VERSION="3.2.6.beta";                          # major.minor.point.stage
 
-  # user settings
+  # Configuration File
+  
+CONFIG_FILE=$HOME/.local/share/yget/yget.conf  # configuration file to use
 
-DOWN_STREAM_RATE="5600K";                      # ~75% of connection speed is good
-OUTPUT_PATH="$HOME/Videos";                    # where to put downloaded videos
-NOTIFY_ICON="/usr/share/icons/Faenza/apps/scalable/youtube.svg"; # url to icon used in GUI notifications
-DATABASEPATH=$HOME/.local/share/yget;
-DATABASE="$DATABASEPATH/yg.db";                # where to place working video queue
+  # global variables from config file
 
-  # dev options
+DOWN_STREAM_RATE="";                           # ~75% of connection speed is good      -- pulled from config file
+DATABASEPATH="";                               # yget working directory                -- pulled from config file
+DATABASE="";                                   # database filename                     -- pulled from config file
+OUTPUT_PATH="";                                # where to store downloaded videos      -- pulled from config file
+NOTIFY_ICON="";                                # url to icon used in GUI notifications -- pulled from config file
+DEBUG="";                                      # output debug information if "Y"       -- pulled from config file
 
-DEBUG="N";                                     # output debug information if "Y"
-
-  # global variables /vomit
+  # global variables
 
 ALREADY_RUNNING="FALSE";                       # ensure only 1 download per system
 ARGUMENT="$1";                                 # user function select / script clarity
@@ -53,6 +54,7 @@ ACTUAL_FORMAT=;                                # cosmetic user notification of t
 DL_ERRORS=0;                                   # counter for determining how many times youtube-dl exited abnormally
 MAX_DL_ERRORS=8;                               # .. abnormal exit cap
 ERROR_TIME=16;                                 # number of seconds to wait after an error.
+
 
 #-------------------------------------------------------------------------------
 
@@ -102,9 +104,22 @@ function Show_Version {
   echo $VERSION;
 }
 
+function Expand_URL {                                         # if the usual URL variable passed on commandline is char "c" get URL from clipboard
+  if [[ "$VIDEO_URL" = "c" ]]; then
+    if [ -f "/usr/bin/xclip" ]; then                          # checked inside 1st if to make xclip a soft dependency, if 2nd argument is a full URL, this code will not execute
+      VIDEO_URL=$(xclip -o);                                  # get url from clipboard
+    else
+      echo "xclip is required to expand a URL from the clipboard."
+      exit 2
+    fi
+  fi    
+}
+
 function Query_URL {
+  # test URL via youtube-dl, supply -e argument to simulate download, then use exit code to determine if the URL was ok.
   local QUERY_RETURN=;
   Convert_Quality;
+  Expand_URL;
   echo; echo "Querying Video..";
   QUERY_RETURN=$( youtube-dl -e --get-title --get-format --prefer-free-formats --max-quality $REQUESTED_FORMAT $VIDEO_URL );
   if [ "$?" = "0" ]; then                                     # if youtube-dl url query succeeded ..
@@ -130,7 +145,21 @@ function Check_If_Running {
   fi  
 }
 
+function Sanitize_Youtube_URLS {
+  # many youtube URL's contain the ampersand (&) character which creates an issue passing the URL
+  # to executables. This function detects if the url contains "youtube.com" as a string, if so, check
+  # for and remove any ampersand and successive characters.
+
+  # detect youtube
+  echo $VIDEO_URL | grep youtube.com > /dev/null
+  if [ "$?" = 0 ]; then                                   # exit code 0 = grep found youtube.com string in the URL
+    # sanitize
+    VIDEO_URL="${VIDEO_URL%%&*}"                          # strip ampersand and successive characters
+  fi
+}
+
 function Add_Record {
+  Sanitize_Youtube_URLS 
   Query_URL;
   if [ "$URL_OK" = "TRUE" ]; then
     echo "Adding: $VIDEO_TITLE";
@@ -143,6 +172,43 @@ function Add_Record {
 
 function Add_Record_Internal {
   echo "$PREFIX@$REQUESTED_FORMAT@$VIDEO_URL@$VIDEO_TITLE@$ACTUAL_FORMAT" >> $DATABASE;
+}
+
+function Advance_Spinner {
+  local CHARS="|/-\\";
+  echo -n "${CHARS:$SPINDEX:1} ";
+  echo -ne "$pc\033[0K\r"
+  (( SPINDEX++ ));
+  if [ $SPINDEX = 4 ]; then
+    SPINDEX=0;
+  fi   
+}
+
+function Poll_Clipboard {
+  local CLIP_CURRENT="";
+  local CLIP_CHECK="hsid8fyuib83riwk3urh";
+  ARGUMENT="m";  
+  Convert_Quality;  
+  if [ -f "/usr/bin/xclip" ]; then
+    echo foo | xclip -i
+    echo "Polling for Youtube URL's on X Clipboard..   (CTRL+C to stop)"
+    while [ 1 = 1 ]; do
+      CLIP_CURRENT=$(xclip -o -quiet);                         # added -quiet to help suppress an xclip output bug
+      echo $CLIP_CURRENT | grep "youtube.com/" > /dev/null
+      if [[ "$?" = "0" ]]; then
+        if [[ "$CLIP_CURRENT" != "$CLIP_CHECK" ]]; then          
+          VIDEO_URL=$CLIP_CURRENT;
+          Add_Record;
+          CLIP_CHECK=$CLIP_CURRENT;
+        fi
+      fi
+      sleep 1
+      Advance_Spinner;
+    done
+  else
+    echo "xclip is required to for clipboard functionality"
+    exit 2
+  fi
 }
 
 function Count_Records {
@@ -159,7 +225,7 @@ function List_Titles_In_DB {
   if [ $RECORDS_IN_DB -ne 0 ]; then                            #
     while [ $RECORD_INDEX -le $RECORDS_IN_DB ]; do             #
       VIDEO_TITLE=$( sed -n -e "$RECORD_INDEX"p $DATABASE | cut -d@ -f4 );  # extract title from 4th field in line n of DB
-      echo " $RECORD_INDEX, $VIDEO_TITLE";                     #
+      echo " $RECORD_INDEX $VIDEO_TITLE";                     #
       RECORD_INDEX=$( expr $RECORD_INDEX + 1 );                #
     done                                                       #
   else                                                         #
@@ -180,7 +246,7 @@ function Display_Header {
   echo;
   echo "D/S Rate          : $DOWN_STREAM_RATE";
   echo "Downloading       : $VIDEO_TITLE";  
-  if [ $DEBUG = "Y" ]; then
+  if [ "$DEBUG" = "Y" ]; then
     echo "URL               : $VIDEO_URL";
   fi
   case "$REQUESTED_FORMAT" in
@@ -295,21 +361,35 @@ function CheckYGetDir {
   fi
 }
 
+function Read_Config_File {  
+  echo "Reading config file..";
+  if [ -f "$CONFIG_FILE" ]; then
+    DOWN_STREAM_RATE=$( cat $CONFIG_FILE | grep _DOWN_STREAM_RATE_ | awk {' print $2 '} );
+    OUTPUT_PATH="$HOME/$( cat $CONFIG_FILE | grep _OUTPUT_PATH_ | awk {' print $2 '} )";
+    DATABASEPATH="$HOME/$( cat $CONFIG_FILE | grep _DATABASEPATH_ | awk {' print $2 '} )";
+    DATABASE="$DATABASEPATH/$( cat $CONFIG_FILE | grep _DATABASE_ | awk {' print $2 '} )";
+    NOTIFY_ICON=$( cat $CONFIG_FILE | grep _NOTIFY_ICON_ | awk {' print $2 '} );
+    DEBUG=$( cat $CONFIG_FILE | grep _DEBUG_ | awk {' print $2 '} );
+  else
+    echo "Configuration file does Not Exist, copy yget.conf from template folder into /home/[user]/.local/share/yget";
+    exit 3
+  fi
+}
+
 # Creates the global variable $OUTPUT_TEMPLATE with the video title, id, and youtube-dl returned video quality value. 
 # $OUTPUT_TEMPLATE provides the template in the format for --output option discussed in the # manual entry for youtube-dl 
 # Added 2013/11/15 by OblongOrange
-# CL: Updated to get stripped data from the format returned from the youtube-dl url-query ($ACTUAL_FORMAT), adding this where relevant.
+# Updated to transform the returned queried format from youtube-dl
+# 2013/Dec/11 CL Fixed for new bug in youtube returned format, can read either 720x1280 or 1280x720, so using both dimensions instead of just frame height
+# -Ideally this function would transform to always get height by sorting. Possibly more complicated than required given the simple solution below.
 function Create_Output_Template {
   local FMT=;
-  FMT=$( echo $ACTUAL_FORMAT | awk {' print $3 '} | cut -dx -f1) # eg return 720 from a string like "22 - 720x1280"
-  case "$FMT" in
-    "360"  ) FMT="-"$FMT"p" ; ;;               # add "p" to $FTM if the format fits any of the values below
-    "480"  ) FMT="-"$FMT"p" ; ;;
-    "720"  ) FMT="-"$FMT"p" ; ;;
-    "1080" ) FMT="-"$FMT"p" ; ;;
-    *      ) FMT="" ; ;;                       # otherwise set $FMT to an empty string.    
-  esac
-  OUTPUT_TEMPLATE="%(title)s-%(id)s$FMT.%(ext)s";
+  FMT=$( echo $ACTUAL_FORMAT | awk {' print $3 '} )  # store resolution (3rd) string from returned format query
+  if [[ "$FMT" != "" ]]; then
+    OUTPUT_TEMPLATE="%(title)s-%(id)s-$FMT.%(ext)s"; # add format to template if one was provided
+  else
+    OUTPUT_TEMPLATE="%(title)s-%(id)s.%(ext)s";      # skip format if none returned
+  fi  
 }
 
 function Download {
@@ -324,7 +404,7 @@ function Download {
         Read_First_Record;                     # populate nasty globals :( from first (top-most) record
         Display_Header;                        # output info from video record
         Create_Output_Template;                # create the OUTPUT_TEMPLATE for filename (adds quality value to filename)
-        youtube-dl --output $OUTPUT_TEMPLATE -r $DOWN_STREAM_RATE --prefer-free-formats --max-quality $REQUESTED_FORMAT "$VIDEO_URL"; # da shiz.
+        youtube-dl --output $OUTPUT_TEMPLATE -r $DOWN_STREAM_RATE --prefer-free-formats --max-quality $REQUESTED_FORMAT "$VIDEO_URL"; # pass all relevant data to youtube-dl
         if [ "$?" = "0" ]; then                # if youtube-dl returned download success (0) then ..
           Send_GUI_Notification;               # ..send GUI notification
           Delete_First_Record;                 # ..delete record at top of list
@@ -344,10 +424,25 @@ function Download {
   fi                                           # end if - already running 
 }
 
+function Poll_Queue {
+# add automatic screen config, check screen existence etc.
+  echo "Polling ..";
+  while [ 1 == 1 ]; do
+    if [ -f $DATABASE ]; then
+      Download;
+      echo "Polling ..";
+    else
+      Advance_Spinner;
+      sleep 2;
+    fi
+  done
+}
+
 #-------------------------------------------------------------------------------
 
-function Main {
+function _Main {
   CheckYGetDir;
+  Read_Config_File;
   cd $OUTPUT_PATH;
   case "$ARGUMENT" in                          # menu: compare commandline input to menu options
     [hml]) Add_Record; ;;                      # if user option = l/m/h .. add url
@@ -360,15 +455,18 @@ function Main {
     v) Show_Version; ;;                        # too confusing to write a comment for
     p) Push_First_Record_To_Last; ;;           #
     t) Push_Last_Record_To_Top; ;;
-    *) Output_Options; ;;
+    P) Poll_Queue; ;;                          # if used with screen etc, can sit in background waiting for d/l requests
+    Pcm) Poll_Clipboard; ;;
+    *) Output_Options; ;;                      # help
   esac
   echo;
 }
 
 #-------------------------------------------------------------------------------
 
-  Main;
+  _Main;
   exit 0;
 
 # The End.
+
 
