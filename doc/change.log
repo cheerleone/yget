@@ -5,7 +5,7 @@
 3.2.1.b
   added config file. allows generic sane defaults to be used for the github release.
 3.2.0.b
-  tidy some code in prep for futire code migration
+  tidy some code in prep for future code migration
 3.1.10.b
   fixed process monitoring regression
 3.1.9.b
