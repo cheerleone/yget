@@ -14,18 +14,13 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-Update to 3.1.6.beta by OblongOrange 2013/15/11
-  Now adds the video quality value to the end of the downloaded video filename (see old Known Limitation (2.1) in docs/knownbugs.txt)
-Update to 3.1.7.beta by OblongOrange 2013/15/11
-  Check_If_Running function updated to check for the existence of the youtube-dl Process itself, and no longer finds all lines containing 'youtube-dl'
-
 BLOCK_COMMENT
 
 #-------------------------------------------------------------------------------
 
   # version
 
-VERSION="3.2.6.beta";                          # major.minor.point.stage
+VERSION="3.2.7.beta";                          # major.minor.point.stage
 
   # Configuration File
   
@@ -38,6 +33,7 @@ DATABASEPATH="";                               # yget working directory         
 DATABASE="";                                   # database filename                     -- pulled from config file
 OUTPUT_PATH="";                                # where to store downloaded videos      -- pulled from config file
 NOTIFY_ICON="";                                # url to icon used in GUI notifications -- pulled from config file
+DESKTOP_NOTIFICATION="";                       # YES/NO - bell disregards this option  -- pulled from config file 
 DEBUG="";                                      # output debug information if "Y"       -- pulled from config file
 
   # global variables
@@ -93,7 +89,7 @@ function Output_Options {
   echo "";
   echo "  Examples";
   echo "    yg h https://youtube.com/somevideo";
-  echo "       -- add high quality 1080p videoto queue";
+  echo "       -- add high quality 1080p video to queue";
   echo "    yg L";
   echo "       -- list queued videos in database";
   echo "    yg s";
@@ -290,7 +286,11 @@ function Delete_First_Record_Option {
 }
 
 function Send_GUI_Notification {
-  notify-send --hint=int:transient:1 -i $NOTIFY_ICON "$VIDEO_TITLE ** downloaded";  
+  # set in config file, turn off for headless primarily server use - only prevents soft-errors where notifications can not be sent
+  if [ "$DESKTOP_NOTIFICATION" = "YES" ]; then
+    notify-send --hint=int:transient:1 -i $NOTIFY_ICON "$VIDEO_TITLE ** downloaded";
+  fi
+  # send bell character to cuttent terminal, results depend on shell / pc configuration. possible outcome of pc beep, or terminal flash
   echo -en "\007";
 }
 
@@ -369,6 +369,7 @@ function Read_Config_File {
     DATABASEPATH="$HOME/$( cat $CONFIG_FILE | grep _DATABASEPATH_ | awk {' print $2 '} )";
     DATABASE="$DATABASEPATH/$( cat $CONFIG_FILE | grep _DATABASE_ | awk {' print $2 '} )";
     NOTIFY_ICON=$( cat $CONFIG_FILE | grep _NOTIFY_ICON_ | awk {' print $2 '} );
+    DESKTOP_NOTIFICATION=$( cat $CONFIG_FILE | grep _DESKTOP_NOTIFICATION_ | awk {' print $2 '} );
     DEBUG=$( cat $CONFIG_FILE | grep _DEBUG_ | awk {' print $2 '} );
   else
     echo "Configuration file does Not Exist, copy yget.conf from template folder into /home/[user]/.local/share/yget";

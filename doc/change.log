@@ -1,3 +1,5 @@
+3.2.7.b OCT-20-2014
+  added config option to turn off desktop notifications
 3.2.6.b
   decided to strip ampersand + irrelevent URL characters to help youtube-dl process the URL faster where the URL contains "youtube.com"
 3.2.2.b - 3.2.4.b
