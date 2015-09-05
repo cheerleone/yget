@@ -366,8 +366,10 @@ function Read_Config_File {
   echo "Reading config file..";
   if [ -f "$CONFIG_FILE" ]; then
     DOWN_STREAM_RATE=$( cat $CONFIG_FILE | grep _DOWN_STREAM_RATE_ | awk {' print $2 '} );
-    OUTPUT_PATH="$HOME/$( cat $CONFIG_FILE | grep _OUTPUT_PATH_ | awk {' print $2 '} )";
-    DATABASEPATH="$HOME/$( cat $CONFIG_FILE | grep _DATABASEPATH_ | awk {' print $2 '} )";
+#    OUTPUT_PATH="$HOME/$( cat $CONFIG_FILE | grep _OUTPUT_PATH_ | awk {' print $2 '} )";
+#    DATABASEPATH="$HOME/$( cat $CONFIG_FILE | grep _DATABASEPATH_ | awk {' print $2 '} )";
+    OUTPUT_PATH="$( cat $CONFIG_FILE | grep _OUTPUT_PATH_ | awk {' print $2 '} )";
+    DATABASEPATH="$( cat $CONFIG_FILE | grep _DATABASEPATH_ | awk {' print $2 '} )";
     DATABASE="$DATABASEPATH/$( cat $CONFIG_FILE | grep _DATABASE_ | awk {' print $2 '} )";
     NOTIFY_ICON=$( cat $CONFIG_FILE | grep _NOTIFY_ICON_ | awk {' print $2 '} );
     DESKTOP_NOTIFICATION=$( cat $CONFIG_FILE | grep _DESKTOP_NOTIFICATION_ | awk {' print $2 '} );
