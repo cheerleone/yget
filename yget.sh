@@ -14,18 +14,13 @@ This program is distributed in the hope that it will be useful, but WITHOUT ANY 
 
 You should have received a copy of the GNU General Public License along with this program; if not, write to the Free Software Foundation, Inc., 51 Franklin Street, Fifth Floor, Boston, MA  02110-1301, USA.
 
-Update to 3.1.6.beta by OblongOrange 2013/15/11
-  Now adds the video quality value to the end of the downloaded video filename (see old Known Limitation (2.1) in docs/knownbugs.txt)
-Update to 3.1.7.beta by OblongOrange 2013/15/11
-  Check_If_Running function updated to check for the existence of the youtube-dl Process itself, and no longer finds all lines containing 'youtube-dl'
-
 BLOCK_COMMENT
 
 #-------------------------------------------------------------------------------
 
   # version
 
-VERSION="3.2.0.beta";                          # major.minor.point.stage
+VERSION="3.2.8.alpha";                          # major.minor.point.stage
 
   # Configuration File
   
@@ -38,19 +33,20 @@ DATABASEPATH="";                               # yget working directory         
 DATABASE="";                                   # database filename                     -- pulled from config file
 OUTPUT_PATH="";                                # where to store downloaded videos      -- pulled from config file
 NOTIFY_ICON="";                                # url to icon used in GUI notifications -- pulled from config file
+DESKTOP_NOTIFICATION="";                       # YES/NO - bell disregards this option  -- pulled from config file 
 DEBUG="";                                      # output debug information if "Y"       -- pulled from config file
 
   # global variables
 
 ALREADY_RUNNING="FALSE";                       # ensure only 1 download per system
 ARGUMENT="$1";                                 # user function select / script clarity
-REQUESTED_FORMAT=;                             # 1080p, 720p etc supplied to $1 as h (high), m (medium), l (low)
+REQ_FMT2=;                                     # TEST_VAR: converted video frame height, 480, 720, 1080 from l, m h.
 VIDEO_TITLE=;                                  # title
 VIDEO_URL="$2";                                # URL to video
 URL_OK="FALSE";                                # return from youtube-dl initial call (ret. TRUE if URL was good)
+RETURNED_FORMAT=;                              # hopefully video frame height, used for output formatting and output file name
 PREFIX="__100__";                              # basic record id. / good for record grep / future asv header
 RECORDS_IN_DB=;                                # cosmetic output and loop end determination
-ACTUAL_FORMAT=;                                # cosmetic user notification of the video format thtat will be downloaded
 DL_ERRORS=0;                                   # counter for determining how many times youtube-dl exited abnormally
 MAX_DL_ERRORS=8;                               # .. abnormal exit cap
 ERROR_TIME=16;                                 # number of seconds to wait after an error.
@@ -62,9 +58,9 @@ ERROR_TIME=16;                                 # number of seconds to wait after
 
 function Convert_Quality {
   case "$ARGUMENT" in
-    h)  REQUESTED_FORMAT="46"; ;;
-    m)  REQUESTED_FORMAT="45"; ;;
-    l)  REQUESTED_FORMAT="44"; ;;
+    h) REQ_FMT2="1080"; ;;
+    m) REQ_FMT2="720"; ;;
+    l) REQ_FMT2="480"; ;;
   esac
 }
 
@@ -93,7 +89,7 @@ function Output_Options {
   echo "";
   echo "  Examples";
   echo "    yg h https://youtube.com/somevideo";
-  echo "       -- add high quality 1080p videoto queue";
+  echo "       -- add high quality 1080p video to queue";
   echo "    yg L";
   echo "       -- list queued videos in database";
   echo "    yg s";
@@ -116,18 +112,19 @@ function Expand_URL {                                         # if the usual URL
 }
 
 function Query_URL {
-  local QUERY_RETURN=;
+  # test URL via youtube-dl, supply -e argument to simulate download, then use exit code to determine if the URL was ok.  
+  local QUERY_RETURN=;  
   Convert_Quality;
   Expand_URL;
-  echo; echo "Querying Video..";
-  QUERY_RETURN=$( youtube-dl -e --get-title --get-format --prefer-free-formats --max-quality $REQUESTED_FORMAT $VIDEO_URL );
+  echo; echo "Querying Video..";  
+  QUERY_RETURN=$( youtube-dl -e --get-title --get-format --prefer-free-formats -f "[height <=? $REQ_FMT2]" $VIDEO_URL );  
   if [ "$?" = "0" ]; then                                     # if youtube-dl url query succeeded ..
     URL_OK="TRUE";                                            # .. set success state
     VIDEO_TITLE=$( echo "$QUERY_RETURN" | sed -n -e "1"p );   # .. title = 1st line from query
-    ACTUAL_FORMAT=$( echo "$QUERY_RETURN" | sed -n -e "2"p ); # .. a.fmt = 2nd line. junk if not youtube, don't use for reqest.
+    RETURNED_FORMAT=$( echo "$QUERY_RETURN" | sed -n -e "2"p | cut -dx -f2 ); # .. a.fmt = 2nd line. junk if not youtube, don't use for reqest.
   else                                                        # if youtube-dl url query failed ..
     URL_OK="FALSE";                                           # .. set fail state
-  fi
+  fi  
 }
 
 function Delete_DB {
@@ -144,11 +141,24 @@ function Check_If_Running {
   fi  
 }
 
+function Sanitize_Youtube_URLS {
+  # many youtube URL's contain the ampersand (&) character which creates an issue passing the URL
+  # to executables. This function detects if the url contains "youtube.com" as a string, if so, check
+  # for and remove any ampersand and successive characters.
+  # detect youtube
+  echo $VIDEO_URL | grep youtube.com > /dev/null
+  if [ "$?" = 0 ]; then                                   # exit code 0 = grep found youtube.com string in the URL
+    # sanitize
+    VIDEO_URL="${VIDEO_URL%%&*}"                          # strip ampersand and successive characters
+  fi
+}
+
 function Add_Record {
+  Sanitize_Youtube_URLS 
   Query_URL;
   if [ "$URL_OK" = "TRUE" ]; then
     echo "Adding: $VIDEO_TITLE";
-    echo "$PREFIX@$REQUESTED_FORMAT@$VIDEO_URL@$VIDEO_TITLE@$ACTUAL_FORMAT" >> $DATABASE;
+    echo "$PREFIX@$REQ_FMT2@$VIDEO_URL@$VIDEO_TITLE@$RETURNED_FORMAT" >> $DATABASE;
     echo "Done.";
   else
     echo "Invalid URL, check arguments with -h";
@@ -156,7 +166,7 @@ function Add_Record {
 }
 
 function Add_Record_Internal {
-  echo "$PREFIX@$REQUESTED_FORMAT@$VIDEO_URL@$VIDEO_TITLE@$ACTUAL_FORMAT" >> $DATABASE;
+  echo "$PREFIX@$REQ_FMT2@$VIDEO_URL@$VIDEO_TITLE@$RETURNED_FORMAT" >> $DATABASE;
 }
 
 function Advance_Spinner {
@@ -175,9 +185,10 @@ function Poll_Clipboard {
   ARGUMENT="m";  
   Convert_Quality;  
   if [ -f "/usr/bin/xclip" ]; then
+    echo foo | xclip -i
     echo "Polling for Youtube URL's on X Clipboard..   (CTRL+C to stop)"
     while [ 1 = 1 ]; do
-      CLIP_CURRENT=$(xclip -o);      
+      CLIP_CURRENT=$(xclip -o -quiet);                         # added -quiet to help suppress an xclip output bug
       echo $CLIP_CURRENT | grep "youtube.com/" > /dev/null
       if [[ "$?" = "0" ]]; then
         if [[ "$CLIP_CURRENT" != "$CLIP_CHECK" ]]; then          
@@ -186,7 +197,7 @@ function Poll_Clipboard {
           CLIP_CHECK=$CLIP_CURRENT;
         fi
       fi
-      sleep 0.2
+      sleep 1
       Advance_Spinner;
     done
   else
@@ -230,15 +241,17 @@ function Display_Header {
   echo;
   echo "D/S Rate          : $DOWN_STREAM_RATE";
   echo "Downloading       : $VIDEO_TITLE";  
-  if [ $DEBUG = "Y" ]; then
+  if [ "$DEBUG" = "Y" ]; then
     echo "URL               : $VIDEO_URL";
   fi
-  case "$REQUESTED_FORMAT" in
-    46) echo "Requested Format  : 1080p format $REQUESTED_FORMAT - WebM"; ;;
-    45) echo "Requested Format  : 720p format $REQUESTED_FORMAT - WebM"; ;;
-    44) echo "Requested Format  : 480p format $REQUESTED_FORMAT - WebM"; ;;
-  esac
-  echo "Actual Format     : $ACTUAL_FORMAT";
+  case "$REQ_FMT2" in
+    "1080") echo "Requested Format  : 1080p"; ;;
+    "720") echo "Requested Format  : 720p"; ;;
+    "480") echo "Requested Format  : 480p"; ;;
+  esac  
+  if [ ! "$RETURNED_FORMAT" = "" ]; then
+    echo "Available Format  : $RETURNED_FORMAT""p";
+  fi
   echo "D/L Remaining     : $RECORDS_IN_DB";
   if [ $DL_ERRORS -ne 0 ]; then
     echo "D/L Errors        : $DL_ERRORS (max: $MAX_DL_ERRORS)";
@@ -246,11 +259,11 @@ function Display_Header {
   echo;
 }
 
-function Read_First_Record {                               # read field 2-5 from 1st record into variables.
-  ACTUAL_FORMAT=$( head -1 "$DATABASE" | cut -d@ -f5 );    # extract actual format - 5th field
-  VIDEO_TITLE=$( head -1 "$DATABASE" | cut -d@ -f4 );      # extract itle - 4th field
+function Read_First_Record {                               # read field 2-5 from 1st record into variables.  
+  VIDEO_TITLE=$( head -1 "$DATABASE" | cut -d@ -f4 );      # extract title - 4th field
   VIDEO_URL=$( head -1 "$DATABASE" | cut -d@ -f3 );        # extract url - 3rd field
-  REQUESTED_FORMAT=$( head -1 "$DATABASE" | cut -d@ -f2 ); # extract requested format - 2nd field
+  REQ_FMT2=$( head -1 "$DATABASE" | cut -d@ -f2 );         # extract requested format - 2nd field
+  RETURNED_FORMAT=$( head -1 "$DATABASE" | cut -d@ -f5 );  # extract returned format - 5th field
 }
 
 function Delete_First_Record {
@@ -274,7 +287,11 @@ function Delete_First_Record_Option {
 }
 
 function Send_GUI_Notification {
-  notify-send --hint=int:transient:1 -i $NOTIFY_ICON "$VIDEO_TITLE ** downloaded";  
+  # set in config file, turn off for headless primarily server use - only prevents soft-errors where notifications can not be sent
+  if [ "$DESKTOP_NOTIFICATION" = "YES" ]; then
+    notify-send --hint=int:transient:1 -i $NOTIFY_ICON "$VIDEO_TITLE ** downloaded";
+  fi
+  # send bell character to cuttent terminal, results depend on shell / pc configuration. possible outcome of pc beep, or terminal flash
   echo -en "\007";
 }
 
@@ -353,6 +370,7 @@ function Read_Config_File {
     DATABASEPATH="$HOME/$( cat $CONFIG_FILE | grep _DATABASEPATH_ | awk {' print $2 '} )";
     DATABASE="$DATABASEPATH/$( cat $CONFIG_FILE | grep _DATABASE_ | awk {' print $2 '} )";
     NOTIFY_ICON=$( cat $CONFIG_FILE | grep _NOTIFY_ICON_ | awk {' print $2 '} );
+    DESKTOP_NOTIFICATION=$( cat $CONFIG_FILE | grep _DESKTOP_NOTIFICATION_ | awk {' print $2 '} );
     DEBUG=$( cat $CONFIG_FILE | grep _DEBUG_ | awk {' print $2 '} );
   else
     echo "Configuration file does Not Exist, copy yget.conf from template folder into /home/[user]/.local/share/yget";
@@ -364,16 +382,15 @@ function Read_Config_File {
 # $OUTPUT_TEMPLATE provides the template in the format for --output option discussed in the # manual entry for youtube-dl 
 # Added 2013/11/15 by OblongOrange
 # Updated to transform the returned queried format from youtube-dl
-# 2013/Dec/11 CL Fixed for new bug in youtube returned format, can read either 720x1280 or 1280x720, so using both dimensions instead of just frame height
-# -Ideally this function would transform to always get height by sorting. Possibly more complicated than required given the simple solution below.
-function Create_Output_Template {
-  local FMT=;
-  FMT=$( echo $ACTUAL_FORMAT | awk {' print $3 '} )  # store resolution (3rd) string from returned format query
-  if [[ "$FMT" != "" ]]; then
-    OUTPUT_TEMPLATE="%(title)s-%(id)s-$FMT.%(ext)s"; # add format to template if one was provided
+# not adding "p" to the end of format, since youtube sometimes spits out videos with the h/w orientation rotated
+# probably due to people setting up their recording environment incorrectly, then adjusting in post processing, 
+# or those twits that record in portrait.
+function Create_Output_Template {  
+  if [[ "$RETURNED_FORMAT" != "" ]]; then
+    OUTPUT_TEMPLATE="%(title)s-%(id)s-$RETURNED_FORMAT.%(ext)s"; # add format to template if one was provided
   else
-    OUTPUT_TEMPLATE="%(title)s-%(id)s.%(ext)s";      # skip format if none returned
-  fi  
+    OUTPUT_TEMPLATE="%(title)s-%(id)s.%(ext)s";      # skip format if none exists
+  fi
 }
 
 function Download {
@@ -388,7 +405,7 @@ function Download {
         Read_First_Record;                     # populate nasty globals :( from first (top-most) record
         Display_Header;                        # output info from video record
         Create_Output_Template;                # create the OUTPUT_TEMPLATE for filename (adds quality value to filename)
-        youtube-dl --output $OUTPUT_TEMPLATE -r $DOWN_STREAM_RATE --prefer-free-formats --max-quality $REQUESTED_FORMAT "$VIDEO_URL"; # pass all relevant data to youtube-dl
+        youtube-dl --output $OUTPUT_TEMPLATE -r $DOWN_STREAM_RATE --prefer-free-formats -f "[height <=? $REQ_FMT2]" "$VIDEO_URL"; # pass all relevant data to youtube-dl
         if [ "$?" = "0" ]; then                # if youtube-dl returned download success (0) then ..
           Send_GUI_Notification;               # ..send GUI notification
           Delete_First_Record;                 # ..delete record at top of list
@@ -448,8 +465,9 @@ function _Main {
 
 #-------------------------------------------------------------------------------
 
-  _Main;
+  _Main;  
   exit 0;
 
 # The End.
+
 
