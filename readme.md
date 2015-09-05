@@ -35,12 +35,10 @@ Experimental Pro-Tip:
 
 For people running file servers and multiple workstations: yget can run in polling mode (option "P"). Using a command like screen you could run yget as daemon.
  
-1) Configure the workstation yget.config to point the $DATABASE variable to location on the fileserver. 
-2) Configure the yget server running in screen in polling mode to access the same database file
-3) Set the server's video output folder to the fileserver's preferred video directory.
+e.g. Configure the workstation yget.config to point the $DATABASE variable to location on the fileserver. Configure the yget server running in screen in polling mode to access the same database file. Set the server's video output folder to the fileserver's preferred video directory.
 
 In this mode you could add many videos locally on your workstation(s) while the server downloads them sequentially to your favorite network location. Alternatively You could also set a cron job to download the videos overnight such that the bandwidth isn't hogged during your active hours. The net benefit is then having access to your downloaded videos to watch from any networked location, and the ability to shutdown any workstations.
 
 -------
-doc.1.5.1
+doc.1.5.2
 
