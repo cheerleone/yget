@@ -20,7 +20,7 @@ BLOCK_COMMENT
 
   # version
 
-VERSION="3.2.8.alpha";                          # major.minor.point.stage
+VERSION="3.2.10.alpha";                        # major.minor.point.stage
 
   # Configuration File
   
@@ -112,19 +112,22 @@ function Expand_URL {                                         # if the usual URL
 }
 
 function Query_URL {
-  # test URL via youtube-dl, supply -e argument to simulate download, then use exit code to determine if the URL was ok.  
-  local QUERY_RETURN=;  
+  # test URL via youtube-dl, supply -e argument to simulate download, then use exit code to determine if the URL was ok.
+  local QUERY_RETURN=;
   Convert_Quality;
   Expand_URL;
-  echo; echo "Querying Video..";  
-  QUERY_RETURN=$( youtube-dl -e --get-title --get-format --prefer-free-formats -f "[height <=? $REQ_FMT2]" $VIDEO_URL );  
+  echo; echo "Querying Video..";
+  # QUERY_RETURN=$( youtube-dl -e --get-title --get-format --prefer-free-formats -f "[height <=? $REQ_FMT2]" $VIDEO_URL );
+  QUERY_RETURN=$( youtube-dl -e --get-title --get-format --prefer-free-formats -f "bestvideo[height<=$REQ_FMT2]" $VIDEO_URL );
   if [ "$?" = "0" ]; then                                     # if youtube-dl url query succeeded ..
     URL_OK="TRUE";                                            # .. set success state
     VIDEO_TITLE=$( echo "$QUERY_RETURN" | sed -n -e "1"p );   # .. title = 1st line from query
-    RETURNED_FORMAT=$( echo "$QUERY_RETURN" | sed -n -e "2"p | cut -dx -f2 ); # .. a.fmt = 2nd line. junk if not youtube, don't use for reqest.
+    RETURNED_FORMAT=$( echo "$QUERY_RETURN" | sed -n -e "2"p | cut -dx -f2 | cut -d" " -f1); # .. a.fmt = 2nd line. junk if not youtube, don't use for reqest.
   else                                                        # if youtube-dl url query failed ..
     URL_OK="FALSE";                                           # .. set fail state
-  fi  
+  fi
+  printf "DB:: qry.ret: $QUERY_RETURN\n";
+  printf "DB:: ret.fmt: $RETURNED_FORMAT\n";
 }
 
 function Delete_DB {
@@ -132,7 +135,8 @@ function Delete_DB {
 }
 
 function Check_If_Running {
-#  ps acx | grep youtube-dl > /dev/null;  # acx does not work for scripts only executable files.
+# ps acx | grep youtube-dl > /dev/null;
+# acx does not work for scripts only executable files.
   ps ax | grep youtube-dl | grep -v grep | grep prefer-free > /dev/null;  #  reverted to original + extra test for running state parameter
   if [ "$?" = "0" ]; then                                 # .. 0 if running
     ALREADY_RUNNING="TRUE";                               # yes? return true
@@ -240,7 +244,7 @@ function List_Titles_In_DB_Loop {
 function Display_Header {
   echo;
   echo "D/S Rate          : $DOWN_STREAM_RATE";
-  echo "Downloading       : $VIDEO_TITLE";  
+  echo "Downloading       : $VIDEO_TITLE";
   if [ "$DEBUG" = "Y" ]; then
     echo "URL               : $VIDEO_URL";
   fi
@@ -259,7 +263,7 @@ function Display_Header {
   echo;
 }
 
-function Read_First_Record {                               # read field 2-5 from 1st record into variables.  
+function Read_First_Record {                               # read field 2-5 from 1st record into variables.
   VIDEO_TITLE=$( head -1 "$DATABASE" | cut -d@ -f4 );      # extract title - 4th field
   VIDEO_URL=$( head -1 "$DATABASE" | cut -d@ -f3 );        # extract url - 3rd field
   REQ_FMT2=$( head -1 "$DATABASE" | cut -d@ -f2 );         # extract requested format - 2nd field
@@ -362,7 +366,7 @@ function CheckYGetDir {
   fi
 }
 
-function Read_Config_File {  
+function Read_Config_File {
   echo "Reading config file..";
   if [ -f "$CONFIG_FILE" ]; then
     DOWN_STREAM_RATE=$( cat $CONFIG_FILE | grep _DOWN_STREAM_RATE_ | awk {' print $2 '} );
@@ -387,7 +391,7 @@ function Read_Config_File {
 # not adding "p" to the end of format, since youtube sometimes spits out videos with the h/w orientation rotated
 # probably due to people setting up their recording environment incorrectly, then adjusting in post processing, 
 # or those twits that record in portrait.
-function Create_Output_Template {  
+function Create_Output_Template {
   if [[ "$RETURNED_FORMAT" != "" ]]; then
     OUTPUT_TEMPLATE="%(title)s-%(id)s-$RETURNED_FORMAT.%(ext)s"; # add format to template if one was provided
   else
@@ -407,7 +411,9 @@ function Download {
         Read_First_Record;                     # populate nasty globals :( from first (top-most) record
         Display_Header;                        # output info from video record
         Create_Output_Template;                # create the OUTPUT_TEMPLATE for filename (adds quality value to filename)
-        youtube-dl --output $OUTPUT_TEMPLATE -r $DOWN_STREAM_RATE --prefer-free-formats -f "[height <=? $REQ_FMT2]" "$VIDEO_URL"; # pass all relevant data to youtube-dl
+        # youtube-dl --output $OUTPUT_TEMPLATE -r $DOWN_STREAM_RATE --prefer-free-formats -f "[height <=? $REQ_FMT2]" "$VIDEO_URL"; # pass all relevant data to youtube-dl
+        youtube-dl --output $OUTPUT_TEMPLATE -r $DOWN_STREAM_RATE --prefer-free-formats -f "bestvideo[height<=$REQ_FMT2]" "$VIDEO_URL"; # pass all relevant data to youtube-dl
+        
         if [ "$?" = "0" ]; then                # if youtube-dl returned download success (0) then ..
           Send_GUI_Notification;               # ..send GUI notification
           Delete_First_Record;                 # ..delete record at top of list
@@ -418,7 +424,7 @@ function Download {
         Count_Records;                         # re-check # remaining videos (could have been ++ in another instance)
       done                                     # end until-do; no more videos to download
       echo; echo "All videos have been downloaded"; echo;
-      Delete_DB;                               # delete temporary working database file    
+      Delete_DB;                               # delete temporary working database file
     else                                       # if no videos remaining..
       echo "No Videos to Download";            # .. display msg. - probably called with 's', without videos in list >.>
     fi                                         # end if - videos remaining
@@ -467,7 +473,7 @@ function _Main {
 
 #-------------------------------------------------------------------------------
 
-  _Main;  
+  _Main;
   exit 0;
 
 # The End.
