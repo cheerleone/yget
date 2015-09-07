@@ -117,8 +117,8 @@ function Query_URL {
   Convert_Quality;
   Expand_URL;
   echo; echo "Querying Video..";
-  # QUERY_RETURN=$( youtube-dl -e --get-title --get-format --prefer-free-formats -f "[height <=? $REQ_FMT2]" $VIDEO_URL );
-  QUERY_RETURN=$( youtube-dl -e --get-title --get-format --prefer-free-formats -f "bestvideo[height<=$REQ_FMT2]" $VIDEO_URL );
+  # QUERY_RETURN=$( youtube-dl -e --get-title --get-format --prefer-free-formats -f "bestvideo[height<=$REQ_FMT2]" $VIDEO_URL );
+  QUERY_RETURN=$( youtube-dl -e --get-title --get-format --prefer-free-formats -f "[height<=$REQ_FMT2]" $VIDEO_URL );
   if [ "$?" = "0" ]; then                                     # if youtube-dl url query succeeded ..
     URL_OK="TRUE";                                            # .. set success state
     VIDEO_TITLE=$( echo "$QUERY_RETURN" | sed -n -e "1"p );   # .. title = 1st line from query
@@ -412,7 +412,8 @@ function Download {
         Display_Header;                        # output info from video record
         Create_Output_Template;                # create the OUTPUT_TEMPLATE for filename (adds quality value to filename)
         # youtube-dl --output $OUTPUT_TEMPLATE -r $DOWN_STREAM_RATE --prefer-free-formats -f "[height <=? $REQ_FMT2]" "$VIDEO_URL"; # pass all relevant data to youtube-dl
-        youtube-dl --output $OUTPUT_TEMPLATE -r $DOWN_STREAM_RATE --prefer-free-formats -f "bestvideo[height<=$REQ_FMT2]" "$VIDEO_URL"; # pass all relevant data to youtube-dl
+        #youtube-dl --output $OUTPUT_TEMPLATE -r $DOWN_STREAM_RATE --prefer-free-formats -f "bestvideo[height<=$REQ_FMT2]" "$VIDEO_URL"; # pass all relevant data to youtube-dl
+        youtube-dl --output $OUTPUT_TEMPLATE -r $DOWN_STREAM_RATE --prefer-free-formats -f "[height<=$REQ_FMT2]" "$VIDEO_URL"; # pass all relevant data to youtube-dl
         
         if [ "$?" = "0" ]; then                # if youtube-dl returned download success (0) then ..
           Send_GUI_Notification;               # ..send GUI notification
