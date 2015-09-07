@@ -1,5 +1,7 @@
+3.2.10.a
+  additional bugfixes for filter / silent videos
 3.2.8.a
-  WIP: fix for removal of --max-quality
+  WIP: fix for removal of --max-quality and addition of new filter arguments to youtube-dl
 3.2.2.b
   Moved text output 'reading config file' to debug output.
 

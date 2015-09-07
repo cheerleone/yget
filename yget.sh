@@ -20,7 +20,7 @@ BLOCK_COMMENT
 
   # version
 
-VERSION="3.2.10.alpha";                        # major.minor.point.stage
+VERSION="3.2.11.alpha";                        # major.minor.point.stage
 
   # Configuration File
   
